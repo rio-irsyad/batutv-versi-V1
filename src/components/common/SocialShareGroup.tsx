@@ -21,7 +21,16 @@ export const SocialShareGroup: React.FC<SocialShareGroupProps> = ({
   const [copied, setCopied] = useState(false);
 
   const getShareUrl = () => {
-    if (url && url.trim().length > 0) return url.trim();
+    if (url && url.trim().length > 0) {
+      const cleanUrl = url.trim();
+      if (typeof window !== 'undefined' && window.location.origin) {
+        const origin = window.location.origin.replace(/\/+$/, '');
+        if (origin && !origin.includes('localhost:3000') && cleanUrl.startsWith('https://batutv.com')) {
+          return cleanUrl.replace('https://batutv.com', origin);
+        }
+      }
+      return cleanUrl;
+    }
     if (typeof window !== 'undefined' && window.location.href) {
       return window.location.href;
     }

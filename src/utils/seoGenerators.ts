@@ -52,6 +52,26 @@ export function getBaseDomain(domainOverride?: string): string {
   if (domainOverride && domainOverride.trim().length > 0) {
     return domainOverride.replace(/\/+$/, '');
   }
+
+  // If in browser and on a live host (e.g., vercel.app or custom host)
+  if (typeof window !== 'undefined' && window.location.origin) {
+    const currentOrigin = window.location.origin.replace(/\/+$/, '');
+    try {
+      const settings = getStoredSiteSettings();
+      const configuredDomain = settings?.identity?.mainDomain?.replace(/\/+$/, '');
+      // If user explicitly configured a matching custom domain, or if configuredDomain is not the default 'https://batutv.com'
+      if (configuredDomain && configuredDomain !== 'https://batutv.com' && !configuredDomain.includes('localhost')) {
+        return configuredDomain;
+      }
+    } catch {
+      // ignore
+    }
+    // Default to the actual live origin the user is currently on
+    if (currentOrigin && !currentOrigin.includes('localhost:3000')) {
+      return currentOrigin;
+    }
+  }
+
   try {
     const settings = getStoredSiteSettings();
     if (settings?.identity?.mainDomain) {
