@@ -276,20 +276,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         uid: 'demo-admin',
       };
 
-      if (credentials.rememberMe) {
-        try {
-          localStorage.setItem(
-            'batutv_admin_session',
-            JSON.stringify({
-              email: matchedDemo.email,
-              role: matchedDemo.role,
-              uid: user.uid,
-              timestamp: Date.now(),
-            })
-          );
-        } catch {
-          // ignore
-        }
+      try {
+        localStorage.setItem(
+          'batutv_admin_session',
+          JSON.stringify({
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            uid: user.uid,
+            timestamp: Date.now(),
+          })
+        );
+      } catch {
+        // ignore
       }
 
       logSystemActivity(

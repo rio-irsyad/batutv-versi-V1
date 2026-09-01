@@ -98,7 +98,17 @@ export default function App() {
   } | null>(() => {
     try {
       const saved = localStorage.getItem('batutv_admin_session');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && (parsed.email || parsed.role)) {
+          return {
+            name: parsed.name || 'Super Administrator BatuTV',
+            email: parsed.email || 'admin@batutv.com',
+            role: parsed.role || 'Administrator',
+          };
+        }
+      }
+      return null;
     } catch {
       return null;
     }
@@ -112,6 +122,18 @@ export default function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // If user is already authenticated and lands on /batutv-control/login, update address bar to /batutv-control/dashboard
+  useEffect(() => {
+    if (authAdmin && currentPath === '/batutv-control/login') {
+      try {
+        window.history.replaceState({}, '', '/batutv-control/dashboard');
+      } catch {
+        // ignore
+      }
+      setCurrentPath('/batutv-control/dashboard');
+    }
+  }, [authAdmin, currentPath]);
 
   // Listen to Firebase Auth state changes
   useEffect(() => {
@@ -474,6 +496,20 @@ export default function App() {
               'success',
               'Auth'
             );
+            try {
+              localStorage.setItem(
+                'batutv_admin_session',
+                JSON.stringify({
+                  name: user.name,
+                  email: user.email,
+                  role: user.role,
+                  uid: (user as any).uid || 'admin',
+                  timestamp: Date.now(),
+                })
+              );
+            } catch {
+              // ignore
+            }
             setAuthAdmin(user);
             const targetPath =
               currentPath && currentPath !== '/batutv-control/login'
