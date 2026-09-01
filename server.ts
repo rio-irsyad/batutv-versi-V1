@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { createServer as createViteServer, ViteDevServer } from 'vite';
 import {
-  getArticleForServer,
+  getArticleForServerAsync,
   buildArticleMetadataHtml,
 } from './src/server/articleResolver';
 import {
@@ -97,7 +97,10 @@ async function startServer() {
   app.get('/berita/:slug', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { slug } = req.params;
-      const article = getArticleForServer(slug);
+      const host = req.headers['x-forwarded-host'] || req.headers.host;
+      const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+      const domainOverride = host ? `${proto}://${host}` : undefined;
+      const article = await getArticleForServerAsync(slug, domainOverride);
 
       // Read template index.html
       const templatePath = isProduction

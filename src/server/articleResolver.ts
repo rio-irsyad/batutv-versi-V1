@@ -51,6 +51,101 @@ export function ensureAbsoluteUrl(url?: string, baseDomain: string = 'https://ba
  * Works with current DEMO data sources and provides a clean abstraction
  * that can easily be swapped with a real database in the future.
  */
+/**
+ * Resolves article data for server-side initial HTML metadata injection.
+ * Works with Firestore database and fallback demo data sources.
+ */
+export async function getArticleForServerAsync(slugOrPath?: string, domainOverride?: string): Promise<ServerArticleMeta | null> {
+  if (!slugOrPath || typeof slugOrPath !== 'string') return null;
+
+  const cleanSlug = slugOrPath
+    .trim()
+    .toLowerCase()
+    .replace(/^\/?(berita\/)?/, '')
+    .replace(/\/+$/, '');
+
+  if (!cleanSlug || cleanSlug === 'undefined' || cleanSlug === 'null') {
+    return null;
+  }
+
+  const baseDomain = (domainOverride && domainOverride.trim()) || INITIAL_SITE_SETTINGS.identity.mainDomain || 'https://batutv.com';
+  const nowIso = new Date().toISOString();
+
+  // 1. Try Firestore REST API
+  try {
+    const projectId = process.env.FIREBASE_PROJECT_ID || 'batutv-portal';
+    const databaseId = '(default)';
+    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents:runQuery`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+    const res = await fetch(firestoreUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: 'articles' }],
+          where: {
+            fieldFilter: {
+              field: { fieldPath: 'slug' },
+              op: 'EQUAL',
+              value: { stringValue: cleanSlug },
+            },
+          },
+          limit: 1,
+        },
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && data[0]?.document) {
+        const docFields = data[0].document.fields || {};
+        const title = docFields.title?.stringValue || 'Berita BatuTV';
+        const slug = docFields.slug?.stringValue || cleanSlug;
+        const excerpt =
+          docFields.excerpt?.stringValue ||
+          docFields.metaDescription?.stringValue ||
+          docFields.summary?.stringValue ||
+          title;
+        const rawImage =
+          docFields.featuredImage?.stringValue ||
+          docFields.imageUrl?.stringValue ||
+          docFields.image?.stringValue ||
+          '';
+        const featuredImage = ensureAbsoluteUrl(rawImage, baseDomain);
+        const author = docFields.author?.stringValue || 'Redaksi BatuTV';
+        const category = docFields.category?.stringValue || 'Berita';
+        const publishedAt = docFields.publishedAt?.stringValue || nowIso;
+        const updatedAt = docFields.updatedAt?.stringValue || publishedAt;
+        const canonicalUrl = `${baseDomain}/berita/${slug}`;
+
+        return {
+          id: data[0].document.name ? data[0].document.name.split('/').pop() : `art-${slug}`,
+          title: title.trim(),
+          slug,
+          excerpt: excerpt.trim(),
+          featuredImage,
+          publishedAt,
+          updatedAt,
+          author,
+          category,
+          canonicalUrl,
+        };
+      }
+    }
+  } catch (err) {
+    // Silently fallback to static data
+  }
+
+  // 2. Fallback to synchronous resolver
+  return getArticleForServer(slugOrPath, domainOverride);
+}
+
 export function getArticleForServer(slugOrPath?: string, domainOverride?: string): ServerArticleMeta | null {
   if (!slugOrPath || typeof slugOrPath !== 'string') return null;
 
