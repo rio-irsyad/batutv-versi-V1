@@ -33,19 +33,31 @@ export const INITIAL_FOOTER_CONFIG: FooterConfig = {
     termsOfServiceUrl: '/syarat-ketentuan',
   },
   socialMedia: {
+    showSection: true,
+    headingText: 'Ikuti kami di:',
     facebookUrl: 'https://facebook.com/batutvofficial',
+    showFacebook: true,
     instagramUrl: 'https://instagram.com/batutv_official',
+    showInstagram: true,
     youtubeUrl: 'https://youtube.com/@batutv',
+    showYoutube: true,
     tiktokUrl: 'https://tiktok.com/@batutv',
+    showTiktok: true,
     xTwitterUrl: 'https://x.com/batutv_official',
+    showXTwitter: true,
+    googleNewsUrl: 'https://news.google.com',
+    showGoogleNews: true,
     telegramUrl: 'https://t.me/batutvchannel',
+    showTelegram: true,
     linkedInUrl: 'https://linkedin.com/company/batutv',
+    showLinkedIn: true,
   },
   copyright: {
     copyrightText: '© 2026 BATUTV Media Network. All Rights Reserved.',
     networkSubtitle: 'A Group Member of Batu Digital Media Network',
   },
   logo: {
+    showLogo: true,
     logoUrl: '/brand/batutv-logo.svg',
     altText: 'BatuTV Media Network Official Logo',
   },
@@ -371,6 +383,10 @@ export function validateFooterForm(config: FooterConfig): {
     errors.socialMedia!.linkedInUrl = 'URL LinkedIn tidak valid';
     hasError = true;
   }
+  if (config.socialMedia.googleNewsUrl && !isValidUrlOrPath(config.socialMedia.googleNewsUrl)) {
+    errors.socialMedia!.googleNewsUrl = 'URL Google News tidak valid';
+    hasError = true;
+  }
 
   // 5. Copyright Validation
   if (!config.copyright.copyrightText?.trim()) {
@@ -388,7 +404,16 @@ export function validateFooterForm(config: FooterConfig): {
  * Generate Organization Schema (JSON-LD) from footer data for SEO
  */
 export function generateOrganizationSchema(config: FooterConfig) {
-  const sameAsLinks = Object.values(config.socialMedia).filter((url) => url && url.trim().length > 0);
+  const sameAsLinks = [
+    config.socialMedia.facebookUrl,
+    config.socialMedia.instagramUrl,
+    config.socialMedia.youtubeUrl,
+    config.socialMedia.tiktokUrl,
+    config.socialMedia.xTwitterUrl,
+    config.socialMedia.telegramUrl,
+    config.socialMedia.linkedInUrl,
+    config.socialMedia.googleNewsUrl,
+  ].filter((url): url is string => typeof url === 'string' && url.trim().length > 0);
 
   return {
     '@context': 'https://schema.org',

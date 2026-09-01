@@ -27,13 +27,24 @@ export interface LegalLinksData {
 }
 
 export interface SocialMediaData {
+  showSection?: boolean;
+  headingText?: string;
   facebookUrl: string;
+  showFacebook?: boolean;
   instagramUrl: string;
+  showInstagram?: boolean;
   youtubeUrl: string;
+  showYoutube?: boolean;
   tiktokUrl: string;
+  showTiktok?: boolean;
   xTwitterUrl: string;
+  showXTwitter?: boolean;
+  googleNewsUrl?: string;
+  showGoogleNews?: boolean;
   telegramUrl: string;
+  showTelegram?: boolean;
   linkedInUrl: string;
+  showLinkedIn?: boolean;
 }
 
 export interface CopyrightData {
@@ -42,6 +53,7 @@ export interface CopyrightData {
 }
 
 export interface FooterLogoData {
+  showLogo?: boolean;
   logoUrl: string;
   altText: string;
   mediaId?: string;

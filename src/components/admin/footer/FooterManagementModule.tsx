@@ -14,6 +14,7 @@ import {
   Info,
   Sparkles,
   Eye,
+  EyeOff,
   Mail,
   Phone,
   MapPin,
@@ -135,7 +136,7 @@ export const FooterManagementModule: React.FC<FooterManagementModuleProps> = ({
     }
   };
 
-  const handleSocialMediaChange = (field: keyof FooterConfig['socialMedia'], value: string) => {
+  const handleSocialMediaChange = (field: keyof FooterConfig['socialMedia'], value: any) => {
     setConfig((prev) => ({
       ...prev,
       socialMedia: { ...prev.socialMedia, [field]: value },
@@ -146,6 +147,13 @@ export const FooterManagementModule: React.FC<FooterManagementModuleProps> = ({
         socialMedia: { ...prev.socialMedia, [field]: undefined },
       }));
     }
+  };
+
+  const handleLogoChange = (field: keyof FooterConfig['logo'], value: any) => {
+    setConfig((prev) => ({
+      ...prev,
+      logo: { ...prev.logo, [field]: value },
+    }));
   };
 
   const handleCopyrightChange = (field: keyof FooterConfig['copyright'], value: string) => {
@@ -889,168 +897,471 @@ export const FooterManagementModule: React.FC<FooterManagementModuleProps> = ({
         {/* ========================================================= */}
         {activeTab === 'socialMedia' && (
           <div className="space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Share2 className="w-4 h-4 text-red-600" />
-                <span>Section 4: Akun Sosial Media Resmi</span>
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Tautkan akun resmi BATUTV pada deretan ikon medsos footer. Boleh dikosongkan jika tidak aktif.
+            <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Share2 className="w-4 h-4 text-red-600" />
+                  <span>Section 4: Akun Sosial Media & Pengaturan Tampilan Link</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Atur link dan visibilitas masing-masing akun sosial media resmi pada footer situs web.
+                </p>
+              </div>
+
+              {/* Master Section Toggle */}
+              <div className="flex items-center gap-3 bg-slate-50 p-2 sm:p-2.5 rounded-xl border border-slate-200">
+                <span className="text-xs font-semibold text-slate-700">Tampilkan Section Medsos:</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleSocialMediaChange('showSection', config.socialMedia.showSection === false ? true : false)
+                  }
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                    config.socialMedia.showSection !== false ? 'bg-emerald-600' : 'bg-slate-300'
+                  }`}
+                  role="switch"
+                  aria-checked={config.socialMedia.showSection !== false}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      config.socialMedia.showSection !== false ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+                <span
+                  className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+                    config.socialMedia.showSection !== false
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  {config.socialMedia.showSection !== false ? 'Aktif' : 'Disembunyikan'}
+                </span>
+              </div>
+            </div>
+
+            {/* Section Heading Text */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Teks Judul / Heading Section Sosial Media
+              </label>
+              <input
+                type="text"
+                value={config.socialMedia.headingText ?? 'Ikuti kami di:'}
+                onChange={(e) => handleSocialMediaChange('headingText', e.target.value)}
+                placeholder="Ikuti kami di:"
+                className="w-full max-w-md px-3.5 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:border-red-500 focus:ring-3 focus:ring-red-100 focus:outline-hidden transition-all"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                Teks pengantar di atas barisan ikon sosial media. Kosongkan jika tidak ingin menampilkan teks.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Facebook URL */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#1877F2] inline-block" />
-                  <span>Facebook URL</span>
-                </label>
-                <input
-                  type="text"
-                  value={config.socialMedia.facebookUrl}
-                  onChange={(e) => handleSocialMediaChange('facebookUrl', e.target.value)}
-                  placeholder="https://facebook.com/batutvofficial"
-                  className={`w-full px-3.5 py-2.5 text-sm rounded-xl border ${
-                    errors.socialMedia?.facebookUrl
-                      ? 'border-rose-400 focus:ring-rose-200'
-                      : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
-                  } focus:outline-hidden focus:ring-3 transition-all`}
-                />
-                {errors.socialMedia?.facebookUrl && (
-                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.facebookUrl}</p>
+            {/* Social Media Platforms Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Facebook */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-[#1877F2] flex items-center justify-center text-white shrink-0">
+                      <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                      </svg>
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">Facebook</span>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {config.socialMedia.showFacebook !== false ? 'Tampil' : 'Sembunyi'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={config.socialMedia.showFacebook !== false}
+                      onChange={(e) => handleSocialMediaChange('showFacebook', e.target.checked)}
+                      className="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={config.socialMedia.facebookUrl || ''}
+                    onChange={(e) => handleSocialMediaChange('facebookUrl', e.target.value)}
+                    placeholder="https://facebook.com/batutvofficial"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border ${
+                      errors.socialMedia?.facebookUrl
+                        ? 'border-rose-400 focus:ring-rose-200'
+                        : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
+                    } focus:outline-hidden focus:ring-2 transition-all`}
+                  />
+                  {errors.socialMedia?.facebookUrl && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.facebookUrl}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Instagram */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center text-white shrink-0">
+                      <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                      </svg>
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">Instagram</span>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {config.socialMedia.showInstagram !== false ? 'Tampil' : 'Sembunyi'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={config.socialMedia.showInstagram !== false}
+                      onChange={(e) => handleSocialMediaChange('showInstagram', e.target.checked)}
+                      className="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={config.socialMedia.instagramUrl || ''}
+                    onChange={(e) => handleSocialMediaChange('instagramUrl', e.target.value)}
+                    placeholder="https://instagram.com/batutv_official"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border ${
+                      errors.socialMedia?.instagramUrl
+                        ? 'border-rose-400 focus:ring-rose-200'
+                        : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
+                    } focus:outline-hidden focus:ring-2 transition-all`}
+                  />
+                  {errors.socialMedia?.instagramUrl && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.instagramUrl}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* YouTube */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-[#FF0000] flex items-center justify-center text-white shrink-0">
+                      <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                      </svg>
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">YouTube</span>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {config.socialMedia.showYoutube !== false ? 'Tampil' : 'Sembunyi'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={config.socialMedia.showYoutube !== false}
+                      onChange={(e) => handleSocialMediaChange('showYoutube', e.target.checked)}
+                      className="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={config.socialMedia.youtubeUrl || ''}
+                    onChange={(e) => handleSocialMediaChange('youtubeUrl', e.target.value)}
+                    placeholder="https://youtube.com/@batutv"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border ${
+                      errors.socialMedia?.youtubeUrl
+                        ? 'border-rose-400 focus:ring-rose-200'
+                        : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
+                    } focus:outline-hidden focus:ring-2 transition-all`}
+                  />
+                  {errors.socialMedia?.youtubeUrl && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.youtubeUrl}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* TikTok */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-black flex items-center justify-center text-white shrink-0">
+                      <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 2.89 3.5 2.78 1.53-.05 2.87-1.16 3.15-2.66.07-.37.09-.76.09-1.14V.02z" />
+                      </svg>
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">TikTok</span>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {config.socialMedia.showTiktok !== false ? 'Tampil' : 'Sembunyi'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={config.socialMedia.showTiktok !== false}
+                      onChange={(e) => handleSocialMediaChange('showTiktok', e.target.checked)}
+                      className="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={config.socialMedia.tiktokUrl || ''}
+                    onChange={(e) => handleSocialMediaChange('tiktokUrl', e.target.value)}
+                    placeholder="https://tiktok.com/@batutv"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border ${
+                      errors.socialMedia?.tiktokUrl
+                        ? 'border-rose-400 focus:ring-rose-200'
+                        : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
+                    } focus:outline-hidden focus:ring-2 transition-all`}
+                  />
+                  {errors.socialMedia?.tiktokUrl && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.tiktokUrl}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* X / Twitter */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-black flex items-center justify-center text-white shrink-0">
+                      <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">X (Twitter)</span>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {config.socialMedia.showXTwitter !== false ? 'Tampil' : 'Sembunyi'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={config.socialMedia.showXTwitter !== false}
+                      onChange={(e) => handleSocialMediaChange('showXTwitter', e.target.checked)}
+                      className="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={config.socialMedia.xTwitterUrl || ''}
+                    onChange={(e) => handleSocialMediaChange('xTwitterUrl', e.target.value)}
+                    placeholder="https://x.com/batutv_official"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border ${
+                      errors.socialMedia?.xTwitterUrl
+                        ? 'border-rose-400 focus:ring-rose-200'
+                        : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
+                    } focus:outline-hidden focus:ring-2 transition-all`}
+                  />
+                  {errors.socialMedia?.xTwitterUrl && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.xTwitterUrl}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Google News */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M3 4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4z" />
+                        <path fill="#EA4335" d="M14.5 7h4v10h-4z" />
+                        <path fill="#FBBC05" d="M5.5 7h7v2.5h-7z" />
+                        <path fill="#34A853" d="M5.5 11h7v2.5h-7z" />
+                        <path fill="#ffffff" d="M5.5 15h7v1.8h-7z" />
+                      </svg>
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">Google News</span>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {config.socialMedia.showGoogleNews !== false ? 'Tampil' : 'Sembunyi'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={config.socialMedia.showGoogleNews !== false}
+                      onChange={(e) => handleSocialMediaChange('showGoogleNews', e.target.checked)}
+                      className="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={config.socialMedia.googleNewsUrl || ''}
+                    onChange={(e) => handleSocialMediaChange('googleNewsUrl', e.target.value)}
+                    placeholder="https://news.google.com"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border ${
+                      errors.socialMedia?.googleNewsUrl
+                        ? 'border-rose-400 focus:ring-rose-200'
+                        : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
+                    } focus:outline-hidden focus:ring-2 transition-all`}
+                  />
+                  {errors.socialMedia?.googleNewsUrl && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.googleNewsUrl}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Telegram */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-[#24A1DE] flex items-center justify-center text-white shrink-0">
+                      <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                        <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM17.9 8.24L15.93 17.52C15.78 18.18 15.39 18.34 14.84 18.03L11.84 15.82L10.39 17.21C10.23 17.37 10.1 17.5 9.79 17.5L10.01 14.45L15.56 9.44C15.8 9.22 15.51 9.1 15.19 9.31L8.33 13.63L5.37 12.7C4.73 12.5 4.71 12.06 5.5 11.75L17.07 7.29C17.61 7.09 18.08 7.42 17.9 8.24Z" />
+                      </svg>
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">Telegram Channel</span>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {config.socialMedia.showTelegram !== false ? 'Tampil' : 'Sembunyi'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={config.socialMedia.showTelegram !== false}
+                      onChange={(e) => handleSocialMediaChange('showTelegram', e.target.checked)}
+                      className="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={config.socialMedia.telegramUrl || ''}
+                    onChange={(e) => handleSocialMediaChange('telegramUrl', e.target.value)}
+                    placeholder="https://t.me/batutvchannel"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border ${
+                      errors.socialMedia?.telegramUrl
+                        ? 'border-rose-400 focus:ring-rose-200'
+                        : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
+                    } focus:outline-hidden focus:ring-2 transition-all`}
+                  />
+                  {errors.socialMedia?.telegramUrl && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.telegramUrl}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* LinkedIn */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-[#0077B5] flex items-center justify-center text-white shrink-0">
+                      <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                      </svg>
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">LinkedIn (Opsional)</span>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {config.socialMedia.showLinkedIn !== false ? 'Tampil' : 'Sembunyi'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={config.socialMedia.showLinkedIn !== false}
+                      onChange={(e) => handleSocialMediaChange('showLinkedIn', e.target.checked)}
+                      className="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={config.socialMedia.linkedInUrl || ''}
+                    onChange={(e) => handleSocialMediaChange('linkedInUrl', e.target.value)}
+                    placeholder="https://linkedin.com/company/batutv"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border ${
+                      errors.socialMedia?.linkedInUrl
+                        ? 'border-rose-400 focus:ring-rose-200'
+                        : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
+                    } focus:outline-hidden focus:ring-2 transition-all`}
+                  />
+                  {errors.socialMedia?.linkedInUrl && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.linkedInUrl}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Real-time Footer Social Live Preview */}
+            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <Eye className="w-3.5 h-3.5 text-red-500" />
+                  <span>Live Preview Bagian Sosial Media di Footer (Dark Canvas #222222)</span>
+                </span>
+                {config.socialMedia.showSection === false && (
+                  <span className="text-[11px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/60 px-2 py-0.5 rounded">
+                    Section dinonaktifkan / disembunyikan
+                  </span>
                 )}
               </div>
 
-              {/* Instagram URL */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block" />
-                  <span>Instagram URL</span>
-                </label>
-                <input
-                  type="text"
-                  value={config.socialMedia.instagramUrl}
-                  onChange={(e) => handleSocialMediaChange('instagramUrl', e.target.value)}
-                  placeholder="https://instagram.com/batutv_official"
-                  className={`w-full px-3.5 py-2.5 text-sm rounded-xl border ${
-                    errors.socialMedia?.instagramUrl
-                      ? 'border-rose-400 focus:ring-rose-200'
-                      : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
-                  } focus:outline-hidden focus:ring-3 transition-all`}
-                />
-                {errors.socialMedia?.instagramUrl && (
-                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.instagramUrl}</p>
-                )}
-              </div>
-
-              {/* YouTube URL */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#FF0000] inline-block" />
-                  <span>YouTube URL</span>
-                </label>
-                <input
-                  type="text"
-                  value={config.socialMedia.youtubeUrl}
-                  onChange={(e) => handleSocialMediaChange('youtubeUrl', e.target.value)}
-                  placeholder="https://youtube.com/@batutv"
-                  className={`w-full px-3.5 py-2.5 text-sm rounded-xl border ${
-                    errors.socialMedia?.youtubeUrl
-                      ? 'border-rose-400 focus:ring-rose-200'
-                      : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
-                  } focus:outline-hidden focus:ring-3 transition-all`}
-                />
-                {errors.socialMedia?.youtubeUrl && (
-                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.youtubeUrl}</p>
-                )}
-              </div>
-
-              {/* TikTok URL */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-black inline-block" />
-                  <span>TikTok URL</span>
-                </label>
-                <input
-                  type="text"
-                  value={config.socialMedia.tiktokUrl}
-                  onChange={(e) => handleSocialMediaChange('tiktokUrl', e.target.value)}
-                  placeholder="https://tiktok.com/@batutv"
-                  className={`w-full px-3.5 py-2.5 text-sm rounded-xl border ${
-                    errors.socialMedia?.tiktokUrl
-                      ? 'border-rose-400 focus:ring-rose-200'
-                      : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
-                  } focus:outline-hidden focus:ring-3 transition-all`}
-                />
-                {errors.socialMedia?.tiktokUrl && (
-                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.tiktokUrl}</p>
-                )}
-              </div>
-
-              {/* X / Twitter URL */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block" />
-                  <span>X / Twitter URL</span>
-                </label>
-                <input
-                  type="text"
-                  value={config.socialMedia.xTwitterUrl}
-                  onChange={(e) => handleSocialMediaChange('xTwitterUrl', e.target.value)}
-                  placeholder="https://x.com/batutv_official"
-                  className={`w-full px-3.5 py-2.5 text-sm rounded-xl border ${
-                    errors.socialMedia?.xTwitterUrl
-                      ? 'border-rose-400 focus:ring-rose-200'
-                      : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
-                  } focus:outline-hidden focus:ring-3 transition-all`}
-                />
-                {errors.socialMedia?.xTwitterUrl && (
-                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.xTwitterUrl}</p>
-                )}
-              </div>
-
-              {/* Telegram URL */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#24A1DE] inline-block" />
-                  <span>Telegram Channel URL</span>
-                </label>
-                <input
-                  type="text"
-                  value={config.socialMedia.telegramUrl}
-                  onChange={(e) => handleSocialMediaChange('telegramUrl', e.target.value)}
-                  placeholder="https://t.me/batutvchannel"
-                  className={`w-full px-3.5 py-2.5 text-sm rounded-xl border ${
-                    errors.socialMedia?.telegramUrl
-                      ? 'border-rose-400 focus:ring-rose-200'
-                      : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
-                  } focus:outline-hidden focus:ring-3 transition-all`}
-                />
-                {errors.socialMedia?.telegramUrl && (
-                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.telegramUrl}</p>
-                )}
-              </div>
-
-              {/* LinkedIn URL (Opsional) */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#0077B5] inline-block" />
-                  <span>LinkedIn URL <span className="text-slate-400 font-normal">(opsional)</span></span>
-                </label>
-                <input
-                  type="text"
-                  value={config.socialMedia.linkedInUrl}
-                  onChange={(e) => handleSocialMediaChange('linkedInUrl', e.target.value)}
-                  placeholder="https://linkedin.com/company/batutv"
-                  className={`w-full px-3.5 py-2.5 text-sm rounded-xl border ${
-                    errors.socialMedia?.linkedInUrl
-                      ? 'border-rose-400 focus:ring-rose-200'
-                      : 'border-slate-200 focus:border-red-500 focus:ring-red-100'
-                  } focus:outline-hidden focus:ring-3 transition-all`}
-                />
-                {errors.socialMedia?.linkedInUrl && (
-                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.socialMedia.linkedInUrl}</p>
+              <div className="w-full bg-[#222222] rounded-xl border border-slate-700/60 p-6 flex flex-col items-center justify-center text-center">
+                {config.socialMedia.showSection === false ? (
+                  <div className="text-xs text-slate-500 py-3 italic flex items-center gap-2">
+                    <EyeOff className="w-4 h-4 text-slate-600" />
+                    <span>Seluruh section media sosial disembunyikan dari footer.</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {config.socialMedia.headingText !== '' && (
+                      <span className="text-xs font-normal text-slate-300">
+                        {config.socialMedia.headingText || 'Ikuti kami di:'}
+                      </span>
+                    )}
+                    <div className="flex items-center justify-center gap-2.5 flex-wrap">
+                      {config.socialMedia.showFacebook !== false && config.socialMedia.facebookUrl && (
+                        <span className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center text-white shadow-sm" title="Facebook">
+                          <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                        </span>
+                      )}
+                      {config.socialMedia.showXTwitter !== false && config.socialMedia.xTwitterUrl && (
+                        <span className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white shadow-sm" title="X">
+                          <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                        </span>
+                      )}
+                      {config.socialMedia.showGoogleNews !== false && (
+                        <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm" title="Google News">
+                          <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M3 4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4z" /><path fill="#EA4335" d="M14.5 7h4v10h-4z" /><path fill="#FBBC05" d="M5.5 7h7v2.5h-7z" /><path fill="#34A853" d="M5.5 11h7v2.5h-7z" /><path fill="#ffffff" d="M5.5 15h7v1.8h-7z" /></svg>
+                        </span>
+                      )}
+                      {config.socialMedia.showTiktok !== false && config.socialMedia.tiktokUrl && (
+                        <span className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white shadow-sm" title="TikTok">
+                          <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 2.89 3.5 2.78 1.53-.05 2.87-1.16 3.15-2.66.07-.37.09-.76.09-1.14V.02z" /></svg>
+                        </span>
+                      )}
+                      {config.socialMedia.showInstagram !== false && config.socialMedia.instagramUrl && (
+                        <span className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center text-white shadow-sm" title="Instagram">
+                          <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
+                        </span>
+                      )}
+                      {config.socialMedia.showYoutube !== false && config.socialMedia.youtubeUrl && (
+                        <span className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center text-white shadow-sm" title="YouTube">
+                          <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg>
+                        </span>
+                      )}
+                      {config.socialMedia.showTelegram !== false && config.socialMedia.telegramUrl && (
+                        <span className="w-8 h-8 rounded-full bg-[#24A1DE] flex items-center justify-center text-white shadow-sm" title="Telegram">
+                          <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM17.9 8.24L15.93 17.52C15.78 18.18 15.39 18.34 14.84 18.03L11.84 15.82L10.39 17.21C10.23 17.37 10.1 17.5 9.79 17.5L10.01 14.45L15.56 9.44C15.8 9.22 15.51 9.1 15.19 9.31L8.33 13.63L5.37 12.7C4.73 12.5 4.71 12.06 5.5 11.75L17.07 7.29C17.61 7.09 18.08 7.42 17.9 8.24Z" /></svg>
+                        </span>
+                      )}
+                      {config.socialMedia.showLinkedIn !== false && config.socialMedia.linkedInUrl && (
+                        <span className="w-8 h-8 rounded-full bg-[#0077B5] flex items-center justify-center text-white shadow-sm" title="LinkedIn">
+                          <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -1130,18 +1441,51 @@ export const FooterManagementModule: React.FC<FooterManagementModuleProps> = ({
         )}
 
         {/* ========================================================= */}
-        {/* TAB 6: LOGO FOOTER (Media Library Picker)                 */}
+        {/* TAB 6: LOGO FOOTER (Media Library Picker & Toggle)         */}
         {/* ========================================================= */}
         {activeTab === 'logo' && (
           <div className="space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-red-600" />
-                <span>Section 6: Logo Footer & Brand Asset</span>
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Pilih logo footer langsung dari Media Library dengan preview real-time.
-              </p>
+            <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-red-600" />
+                  <span>Section 6: Logo Footer & Brand Asset</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Atur tampilan, visibilitas (tampilkan/sembunyikan), serta aset logo footer situs web.
+                </p>
+              </div>
+
+              {/* Master Logo Visibility Toggle */}
+              <div className="flex items-center gap-3 bg-slate-50 p-2 sm:p-2.5 rounded-xl border border-slate-200">
+                <span className="text-xs font-semibold text-slate-700">Tampilkan Logo di Footer:</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleLogoChange('showLogo', config.logo.showLogo === false ? true : false)
+                  }
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                    config.logo.showLogo !== false ? 'bg-emerald-600' : 'bg-slate-300'
+                  }`}
+                  role="switch"
+                  aria-checked={config.logo.showLogo !== false}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      config.logo.showLogo !== false ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+                <span
+                  className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+                    config.logo.showLogo !== false
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  {config.logo.showLogo !== false ? 'Aktif' : 'Disembunyikan'}
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
@@ -1154,12 +1498,7 @@ export const FooterManagementModule: React.FC<FooterManagementModuleProps> = ({
                     <input
                       type="text"
                       value={config.logo.logoUrl}
-                      onChange={(e) =>
-                        setConfig((prev) => ({
-                          ...prev,
-                          logo: { ...prev.logo, logoUrl: e.target.value },
-                        }))
-                      }
+                      onChange={(e) => handleLogoChange('logoUrl', e.target.value)}
                       placeholder="/brand/batutv-logo.svg atau https://..."
                       className="flex-1 px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-red-500 focus:ring-3 focus:ring-red-100 focus:outline-hidden transition-all"
                     />
@@ -1181,12 +1520,7 @@ export const FooterManagementModule: React.FC<FooterManagementModuleProps> = ({
                   <input
                     type="text"
                     value={config.logo.altText}
-                    onChange={(e) =>
-                      setConfig((prev) => ({
-                        ...prev,
-                        logo: { ...prev.logo, altText: e.target.value },
-                      }))
-                    }
+                    onChange={(e) => handleLogoChange('altText', e.target.value)}
                     placeholder="BatuTV Media Network"
                     className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-red-500 focus:ring-3 focus:ring-red-100 focus:outline-hidden transition-all"
                   />
@@ -1195,12 +1529,25 @@ export const FooterManagementModule: React.FC<FooterManagementModuleProps> = ({
 
               {/* Live Preview Card */}
               <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 flex flex-col items-center justify-center text-center space-y-3">
-                <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
-                  Live Preview Logo (Dark Canvas #222222)
-                </span>
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <Eye className="w-3.5 h-3.5 text-red-500" />
+                    <span>Live Preview Logo (Dark Canvas #222222)</span>
+                  </span>
+                  {config.logo.showLogo === false && (
+                    <span className="text-[10px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/60 px-2 py-0.5 rounded">
+                      Logo Disembunyikan
+                    </span>
+                  )}
+                </div>
                 
                 <div className="w-full max-w-[260px] h-28 bg-[#222222] rounded-xl border border-slate-700/60 flex items-center justify-center p-4">
-                  {config.logo.logoUrl ? (
+                  {config.logo.showLogo === false ? (
+                    <div className="text-xs text-slate-500 flex items-center gap-1.5 italic">
+                      <EyeOff className="w-4 h-4 text-slate-600" />
+                      <span>Logo footer disembunyikan</span>
+                    </div>
+                  ) : config.logo.logoUrl ? (
                     <img
                       src={config.logo.logoUrl}
                       alt={config.logo.altText || 'Logo Preview'}
@@ -1215,7 +1562,9 @@ export const FooterManagementModule: React.FC<FooterManagementModuleProps> = ({
                 </div>
 
                 <p className="text-xs text-slate-400">
-                  {config.logo.altText || 'BatuTV Media Network'}
+                  {config.logo.showLogo === false
+                    ? 'Status: Tidak ditampilkan pada footer'
+                    : config.logo.altText || 'BatuTV Media Network'}
                 </p>
               </div>
             </div>
