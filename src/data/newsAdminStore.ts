@@ -39,7 +39,7 @@ export function getStoredArticles(): AdminArticle[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed;
       }
     }
@@ -460,56 +460,84 @@ export function persistArticle(article: AdminArticle): AdminArticle[] {
   const existingIdx = articles.findIndex((a) => a.id === article.id);
 
   let updatedList: AdminArticle[];
+  let articleToSave: AdminArticle;
   if (existingIdx >= 0) {
-    updatedList = [...articles];
-    updatedList[existingIdx] = {
+    articleToSave = {
       ...article,
       updatedAt: new Date().toISOString(),
     };
+    updatedList = [...articles];
+    updatedList[existingIdx] = articleToSave;
   } else {
-    updatedList = [
-      {
-        ...article,
-        createdAt: article.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        views: article.views || 0,
-      },
-      ...articles,
-    ];
+    articleToSave = {
+      ...article,
+      createdAt: article.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      views: article.views || 0,
+    };
+    updatedList = [articleToSave, ...articles];
   }
 
   const normalized = normalizeHeadlinePositions(updatedList);
   saveStoredArticles(normalized);
+
+  // Asynchronously synchronize to Firestore Database
+  firestoreArticleRepository.saveArticle(articleToSave).catch((err) => {
+    console.warn('[newsAdminStore] Error syncing article to Firestore:', err);
+  });
+
   return normalized;
 }
 
 // Move to Trash
 export function moveArticleToTrash(id: string): AdminArticle[] {
   const articles = getStoredArticles();
-  const updated = articles.map((a) =>
-    a.id === id
-      ? {
-          ...a,
-          status: 'trash' as ArticleStatus,
-          isHeadline: false,
-          headlinePosition: null,
-          updatedAt: new Date().toISOString(),
-        }
-      : a
-  );
+  let trashedArticle: AdminArticle | null = null;
+  const updated = articles.map((a) => {
+    if (a.id === id) {
+      trashedArticle = {
+        ...a,
+        status: 'trash' as ArticleStatus,
+        isHeadline: false,
+        headlinePosition: null,
+        updatedAt: new Date().toISOString(),
+      };
+      return trashedArticle;
+    }
+    return a;
+  });
   const normalized = normalizeHeadlinePositions(updated);
   saveStoredArticles(normalized);
+
+  if (trashedArticle) {
+    firestoreArticleRepository.saveArticle(trashedArticle).catch((err) => {
+      console.warn('[newsAdminStore] Error syncing trash status to Firestore:', err);
+    });
+  }
+
   return normalized;
 }
 
 // Restore from Trash
 export function restoreArticleFromTrash(id: string): AdminArticle[] {
   const articles = getStoredArticles();
-  const updated = articles.map((a) =>
-    a.id === id ? { ...a, status: 'draft' as ArticleStatus, updatedAt: new Date().toISOString() } : a
-  );
+  let restoredArticle: AdminArticle | null = null;
+  const updated = articles.map((a) => {
+    if (a.id === id) {
+      restoredArticle = { ...a, status: 'draft' as ArticleStatus, updatedAt: new Date().toISOString() };
+      return restoredArticle;
+    }
+    return a;
+  });
   const normalized = normalizeHeadlinePositions(updated);
   saveStoredArticles(normalized);
+
+  if (restoredArticle) {
+    firestoreArticleRepository.saveArticle(restoredArticle).catch((err) => {
+      console.warn('[newsAdminStore] Error syncing restored article to Firestore:', err);
+    });
+  }
+
   return normalized;
 }
 
@@ -519,6 +547,12 @@ export function deleteArticlePermanently(id: string): AdminArticle[] {
   const updated = articles.filter((a) => a.id !== id);
   const normalized = normalizeHeadlinePositions(updated);
   saveStoredArticles(normalized);
+
+  // Asynchronously delete from Firestore
+  firestoreArticleRepository.deleteArticle(id).catch((err) => {
+    console.warn('[newsAdminStore] Error deleting article permanently from Firestore:', err);
+  });
+
   return normalized;
 }
 
@@ -547,6 +581,11 @@ export function duplicateArticle(id: string): { updatedArticles: AdminArticle[];
 
   const updated = [newArticle, ...articles];
   saveStoredArticles(updated);
+
+  firestoreArticleRepository.saveArticle(newArticle).catch((err) => {
+    console.warn('[newsAdminStore] Error creating duplicate in Firestore:', err);
+  });
+
   return { updatedArticles: updated, newArticle };
 }
 
@@ -569,6 +608,11 @@ export function bulkUpdateStatus(ids: string[], newStatus: ArticleStatus): Admin
   });
   const normalized = normalizeHeadlinePositions(updated);
   saveStoredArticles(normalized);
+
+  firestoreArticleRepository.bulkUpdateStatus(ids, newStatus).catch((err) => {
+    console.warn('[newsAdminStore] Error bulk updating status in Firestore:', err);
+  });
+
   return normalized;
 }
 
@@ -578,6 +622,11 @@ export function bulkPermanentDelete(ids: string[]): AdminArticle[] {
   const updated = articles.filter((a) => !idSet.has(a.id));
   const normalized = normalizeHeadlinePositions(updated);
   saveStoredArticles(normalized);
+
+  firestoreArticleRepository.bulkDelete(ids).catch((err) => {
+    console.warn('[newsAdminStore] Error bulk deleting in Firestore:', err);
+  });
+
   return normalized;
 }
 

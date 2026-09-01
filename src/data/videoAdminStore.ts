@@ -16,16 +16,14 @@ export function getStoredVideos(): AdminVideo[] {
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
+    if (raw === null) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialAdminVideos));
       return initialAdminVideos;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
-    // Fallback if empty array
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialAdminVideos));
     return initialAdminVideos;
   } catch (err) {
     console.error('Error reading batutv_admin_videos from localStorage:', err);
