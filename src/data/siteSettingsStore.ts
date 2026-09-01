@@ -46,6 +46,28 @@ export const INITIAL_SITE_SETTINGS: SiteSettings = {
     headingWeight: '800',
     bodyWeight: '400',
     fontSizeScale: 'normal',
+    topicBar: {
+      fontSize: 11,
+      fontWeight: '400',
+      fontFamily: 'inherit',
+      textTransform: 'none',
+      badgePadding: 'normal',
+      badgeBgColor: '#f1f3f5',
+      badgeTextColor: '#334155',
+    },
+    navigation: {
+      fontSize: 12.5,
+      fontWeight: '900',
+      letterSpacing: 'wide',
+      textTransform: 'uppercase',
+    },
+    footerMenu: {
+      fontSize: 13,
+      fontWeight: '700',
+      gap: 'normal',
+      textColor: '#ffffff',
+      hoverColor: '#ef4444',
+    },
   },
   seo: {
     defaultSiteTitle: 'BatuTV | Portal Berita Terkini, Daerah Batu, Nasional & Video',
@@ -109,7 +131,22 @@ function loadLocalCache(): SiteSettings {
       logos: { ...INITIAL_SITE_SETTINGS.logos, ...(parsed.logos || {}) },
       favicon: { ...INITIAL_SITE_SETTINGS.favicon, ...(parsed.favicon || {}) },
       colors: { ...INITIAL_SITE_SETTINGS.colors, ...(parsed.colors || {}) },
-      typography: { ...INITIAL_SITE_SETTINGS.typography, ...(parsed.typography || {}) },
+      typography: {
+        ...INITIAL_SITE_SETTINGS.typography,
+        ...(parsed.typography || {}),
+        topicBar: {
+          ...INITIAL_SITE_SETTINGS.typography.topicBar,
+          ...(parsed.typography?.topicBar || {}),
+        },
+        navigation: {
+          ...INITIAL_SITE_SETTINGS.typography.navigation,
+          ...(parsed.typography?.navigation || {}),
+        },
+        footerMenu: {
+          ...INITIAL_SITE_SETTINGS.typography.footerMenu,
+          ...(parsed.typography?.footerMenu || {}),
+        },
+      },
       seo: { ...INITIAL_SITE_SETTINGS.seo, ...(parsed.seo || {}) },
       publisher: { ...INITIAL_SITE_SETTINGS.publisher, ...(parsed.publisher || {}) },
       socialMedia: { ...INITIAL_SITE_SETTINGS.socialMedia, ...(parsed.socialMedia || {}) },
@@ -410,12 +447,50 @@ export function applySiteSettingsToDOM(settings: SiteSettings): void {
       }
       if (settings.typography.fontSizeScale) {
         const scaleMap: Record<string, string> = {
-          compact: '120%',
-          normal: '130%',
-          spacious: '140%',
+          compact: '110%',
+          normal: '120%',
+          spacious: '130%',
         };
-        root.style.setProperty('--font-base-scale', scaleMap[settings.typography.fontSizeScale] || '130%');
-        root.style.fontSize = scaleMap[settings.typography.fontSizeScale] || '130%';
+        root.style.setProperty('--font-base-scale', scaleMap[settings.typography.fontSizeScale] || '120%');
+        root.style.fontSize = scaleMap[settings.typography.fontSizeScale] || '120%';
+      }
+
+      // Topic Bar Typography Variables
+      if (settings.typography.topicBar) {
+        const tb = settings.typography.topicBar;
+        root.style.setProperty('--topic-font-size', `${tb.fontSize || 11}px`);
+        root.style.setProperty('--topic-font-weight', tb.fontWeight || '400');
+        if (tb.fontFamily && tb.fontFamily !== 'inherit') {
+          root.style.setProperty('--topic-font-family', `'${tb.fontFamily}', sans-serif`);
+        } else {
+          root.style.removeProperty('--topic-font-family');
+        }
+        if (tb.badgeBgColor) {
+          root.style.setProperty('--topic-badge-bg', tb.badgeBgColor);
+        }
+        if (tb.badgeTextColor) {
+          root.style.setProperty('--topic-badge-color', tb.badgeTextColor);
+        }
+      }
+
+      // Navigation Typography Variables
+      if (settings.typography.navigation) {
+        const nav = settings.typography.navigation;
+        root.style.setProperty('--nav-font-size', `${nav.fontSize || 12.5}px`);
+        root.style.setProperty('--nav-font-weight', nav.fontWeight || '900');
+      }
+
+      // Footer Menu Typography Variables
+      if (settings.typography.footerMenu) {
+        const ft = settings.typography.footerMenu;
+        root.style.setProperty('--footer-menu-font-size', `${ft.fontSize || 13}px`);
+        root.style.setProperty('--footer-menu-font-weight', ft.fontWeight || '700');
+        if (ft.textColor) {
+          root.style.setProperty('--footer-menu-color', ft.textColor);
+        }
+        if (ft.hoverColor) {
+          root.style.setProperty('--footer-menu-hover-color', ft.hoverColor);
+        }
       }
     }
 

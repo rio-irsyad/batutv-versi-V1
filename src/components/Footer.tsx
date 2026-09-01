@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CategoryItem } from '../types/news';
 import { FooterConfig, getStoredFooterConfig, FOOTER_UPDATED_EVENT, generateOrganizationSchema } from '../data/footerAdminStore';
+import { getStoredSiteSettings, SITE_SETTINGS_UPDATED_EVENT } from '../data/siteSettingsStore';
+import { SiteSettings } from '../types/siteSettings';
 import { BatuTVBrandLogo } from './common/BatuTVBrandLogo';
 
 interface FooterProps {
@@ -22,6 +24,7 @@ interface FooterProps {
  */
 export const Footer: React.FC<FooterProps> = ({ onNavigateAdmin, onNavigate }) => {
   const [config, setConfig] = useState<FooterConfig>(() => getStoredFooterConfig());
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => getStoredSiteSettings());
 
   // Listen to live updates from CMS without requiring full page reload
   useEffect(() => {
@@ -34,9 +37,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateAdmin, onNavigate }) =
       }
     };
 
+    const handleSiteSettingsUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<SiteSettings>;
+      if (customEvent.detail) {
+        setSiteSettings(customEvent.detail);
+      } else {
+        setSiteSettings(getStoredSiteSettings());
+      }
+    };
+
     window.addEventListener(FOOTER_UPDATED_EVENT, handleFooterUpdate);
+    window.addEventListener(SITE_SETTINGS_UPDATED_EVENT, handleSiteSettingsUpdate);
     return () => {
       window.removeEventListener(FOOTER_UPDATED_EVENT, handleFooterUpdate);
+      window.removeEventListener(SITE_SETTINGS_UPDATED_EVENT, handleSiteSettingsUpdate);
     };
   }, []);
 
@@ -245,92 +259,116 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateAdmin, onNavigate }) =
         {/* ========================================================= */}
         {/* 3. SITE NAVIGATION LINKS (Bold White Centered Row)        */}
         {/* ========================================================= */}
-        <nav
-          aria-label="Navigasi Footer Portal"
-          className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-7 gap-y-2.5 my-3 text-xs sm:text-sm font-bold text-white tracking-normal"
-        >
-          {config.companyLinks.tentangKamiUrl && (
-            <a
-              href={config.companyLinks.tentangKamiUrl}
-              onClick={(e) => handleLinkClick(e, config.companyLinks.tentangKamiUrl)}
-              className="hover:text-red-500 transition-colors"
+        {(() => {
+          const ftTypo = siteSettings?.typography?.footerMenu || {
+            fontSize: 13,
+            fontWeight: '700',
+            gap: 'normal',
+            textColor: '#ffffff',
+            hoverColor: '#ef4444',
+          };
+          const getGapClass = (gap?: string) => {
+            if (gap === 'compact') return 'gap-x-3 sm:gap-x-4 gap-y-2';
+            if (gap === 'spacious') return 'gap-x-6 sm:gap-x-10 gap-y-3';
+            return 'gap-x-4 sm:gap-x-7 gap-y-2.5';
+          };
+
+          return (
+            <nav
+              aria-label="Navigasi Footer Portal"
+              style={{
+                fontSize: ftTypo.fontSize ? `${ftTypo.fontSize}px` : undefined,
+                fontWeight: ftTypo.fontWeight || 700,
+                color: ftTypo.textColor || undefined,
+              }}
+              className={`flex flex-wrap items-center justify-center ${getGapClass(
+                ftTypo.gap
+              )} my-3 tracking-normal`}
             >
-              Tentang Kami
-            </a>
-          )}
-          {config.companyLinks.redaksiUrl && (
-            <a
-              href={config.companyLinks.redaksiUrl}
-              onClick={(e) => handleLinkClick(e, config.companyLinks.redaksiUrl)}
-              className="hover:text-red-500 transition-colors"
-            >
-              Redaksi
-            </a>
-          )}
-          {config.companyLinks.kontakUrl && (
-            <a
-              href={config.companyLinks.kontakUrl}
-              onClick={(e) => handleLinkClick(e, config.companyLinks.kontakUrl)}
-              className="hover:text-red-500 transition-colors"
-            >
-              Kontak
-            </a>
-          )}
-          {config.companyLinks.karirUrl && (
-            <a
-              href={config.companyLinks.karirUrl}
-              onClick={(e) => handleLinkClick(e, config.companyLinks.karirUrl)}
-              className="hover:text-red-500 transition-colors"
-            >
-              Karir
-            </a>
-          )}
-          {config.legalLinks.pedomanMediaSiberUrl && (
-            <a
-              href={config.legalLinks.pedomanMediaSiberUrl}
-              onClick={(e) => handleLinkClick(e, config.legalLinks.pedomanMediaSiberUrl)}
-              className="hover:text-red-500 transition-colors"
-            >
-              Pedoman Media Siber
-            </a>
-          )}
-          {config.legalLinks.kodeEtikJurnalistikUrl && (
-            <a
-              href={config.legalLinks.kodeEtikJurnalistikUrl}
-              onClick={(e) => handleLinkClick(e, config.legalLinks.kodeEtikJurnalistikUrl)}
-              className="hover:text-red-500 transition-colors"
-            >
-              Kode Etik
-            </a>
-          )}
-          {config.legalLinks.disclaimerUrl && (
-            <a
-              href={config.legalLinks.disclaimerUrl}
-              onClick={(e) => handleLinkClick(e, config.legalLinks.disclaimerUrl)}
-              className="hover:text-red-500 transition-colors"
-            >
-              Disclaimer
-            </a>
-          )}
-          {config.legalLinks.privacyPolicyUrl && (
-            <a
-              href={config.legalLinks.privacyPolicyUrl}
-              onClick={(e) => handleLinkClick(e, config.legalLinks.privacyPolicyUrl)}
-              className="hover:text-red-500 transition-colors"
-            >
-              Privacy Policy
-            </a>
-          )}
-          {config.legalLinks.termsOfServiceUrl && (
-            <a
-              href={config.legalLinks.termsOfServiceUrl}
-              onClick={(e) => handleLinkClick(e, config.legalLinks.termsOfServiceUrl)}
-              className="hover:text-red-500 transition-colors"
-            >
-              Terms of Service
-            </a>
-          )}
-        </nav>
+              {config.companyLinks.tentangKamiUrl && (
+                <a
+                  href={config.companyLinks.tentangKamiUrl}
+                  onClick={(e) => handleLinkClick(e, config.companyLinks.tentangKamiUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Tentang Kami
+                </a>
+              )}
+              {config.companyLinks.redaksiUrl && (
+                <a
+                  href={config.companyLinks.redaksiUrl}
+                  onClick={(e) => handleLinkClick(e, config.companyLinks.redaksiUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Redaksi
+                </a>
+              )}
+              {config.companyLinks.kontakUrl && (
+                <a
+                  href={config.companyLinks.kontakUrl}
+                  onClick={(e) => handleLinkClick(e, config.companyLinks.kontakUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Kontak
+                </a>
+              )}
+              {config.companyLinks.karirUrl && (
+                <a
+                  href={config.companyLinks.karirUrl}
+                  onClick={(e) => handleLinkClick(e, config.companyLinks.karirUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Karir
+                </a>
+              )}
+              {config.legalLinks.pedomanMediaSiberUrl && (
+                <a
+                  href={config.legalLinks.pedomanMediaSiberUrl}
+                  onClick={(e) => handleLinkClick(e, config.legalLinks.pedomanMediaSiberUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Pedoman Media Siber
+                </a>
+              )}
+              {config.legalLinks.kodeEtikJurnalistikUrl && (
+                <a
+                  href={config.legalLinks.kodeEtikJurnalistikUrl}
+                  onClick={(e) => handleLinkClick(e, config.legalLinks.kodeEtikJurnalistikUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Kode Etik
+                </a>
+              )}
+              {config.legalLinks.disclaimerUrl && (
+                <a
+                  href={config.legalLinks.disclaimerUrl}
+                  onClick={(e) => handleLinkClick(e, config.legalLinks.disclaimerUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Disclaimer
+                </a>
+              )}
+              {config.legalLinks.privacyPolicyUrl && (
+                <a
+                  href={config.legalLinks.privacyPolicyUrl}
+                  onClick={(e) => handleLinkClick(e, config.legalLinks.privacyPolicyUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Privacy Policy
+                </a>
+              )}
+              {config.legalLinks.termsOfServiceUrl && (
+                <a
+                  href={config.legalLinks.termsOfServiceUrl}
+                  onClick={(e) => handleLinkClick(e, config.legalLinks.termsOfServiceUrl)}
+                  className="hover:text-red-500 transition-colors"
+                >
+                  Terms of Service
+                </a>
+              )}
+            </nav>
+          );
+        })()}
 
         {/* ========================================================= */}
         {/* 4. COPYRIGHT & NETWORK SUBTITLE                            */}

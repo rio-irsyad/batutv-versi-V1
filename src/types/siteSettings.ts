@@ -52,12 +52,40 @@ export interface BrandColors {
   background: string; // e.g. #F8FAFC
 }
 
+export interface TopicBarTypography {
+  fontSize: number; // e.g. 10, 11, 12, 13, 14
+  fontWeight: '400' | '500' | '600' | '700';
+  fontFamily: string; // 'inherit' | 'Plus Jakarta Sans' | 'Inter' | 'Roboto' | 'Poppins' | 'Montserrat' | 'Open Sans' | 'Lato'
+  textTransform: 'none' | 'uppercase' | 'capitalize' | 'lowercase';
+  badgePadding: 'compact' | 'normal' | 'spacious';
+  badgeBgColor?: string;
+  badgeTextColor?: string;
+}
+
+export interface NavigationTypography {
+  fontSize: number; // e.g. 11, 12, 12.5, 13, 14
+  fontWeight: '400' | '500' | '600' | '700' | '800' | '900';
+  letterSpacing: 'tight' | 'normal' | 'wide' | 'wider';
+  textTransform: 'uppercase' | 'capitalize' | 'none';
+}
+
+export interface FooterMenuTypography {
+  fontSize: number; // e.g. 11, 12, 13, 14, 15, 16
+  fontWeight: '400' | '500' | '600' | '700';
+  gap: 'compact' | 'normal' | 'spacious';
+  textColor?: string;
+  hoverColor?: string;
+}
+
 export interface TypographySettings {
   headingFont: SupportedFont;
   bodyFont: SupportedFont;
   headingWeight?: '600' | '700' | '800' | '900';
   bodyWeight?: '400' | '500';
   fontSizeScale?: 'compact' | 'normal' | 'spacious';
+  topicBar?: TopicBarTypography;
+  navigation?: NavigationTypography;
+  footerMenu?: FooterMenuTypography;
 }
 
 export interface GlobalSEOSettings {

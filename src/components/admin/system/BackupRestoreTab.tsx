@@ -21,6 +21,8 @@ import {
   RefreshCw,
   Info,
   Lock,
+  CloudUpload,
+  Database,
 } from 'lucide-react';
 import { BackupEntity, ImportValidationResult } from '../../../types/systemSettings';
 import {
@@ -30,6 +32,7 @@ import {
   executeImportRestore,
 } from '../../../data/systemSettingsStore';
 import { AdminUser } from '../../../types/admin';
+import { seedAllDataToFirestore, SeedProgress } from '../../../scripts/clientFirestoreSeeder';
 
 interface BackupRestoreTabProps {
   user: AdminUser | null;
@@ -137,6 +140,35 @@ export const BackupRestoreTab: React.FC<BackupRestoreTabProps> = ({ user, isAdmi
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Cloud Firestore Seeding State
+  const [isCloudSeeding, setIsCloudSeeding] = useState(false);
+  const [cloudSeedProgress, setCloudSeedProgress] = useState<SeedProgress | null>(null);
+  const [cloudSeedResult, setCloudSeedResult] = useState<{
+    success: boolean;
+    message: string;
+    summary?: Record<string, number>;
+  } | null>(null);
+
+  const handleExecuteCloudSeed = async () => {
+    if (!isAdmin || isCloudSeeding) return;
+    setIsCloudSeeding(true);
+    setCloudSeedResult(null);
+
+    try {
+      const result = await seedAllDataToFirestore((prog) => {
+        setCloudSeedProgress(prog);
+      });
+      setCloudSeedResult(result);
+    } catch (err: any) {
+      setCloudSeedResult({
+        success: false,
+        message: err?.message || 'Gagal melakukan inisialisasi cloud database',
+      });
+    } finally {
+      setIsCloudSeeding(false);
+    }
+  };
+
   // Toggle Entity Check
   const handleToggleEntity = (key: BackupEntity) => {
     setSelectedEntities((prev) =>
@@ -224,6 +256,77 @@ export const BackupRestoreTab: React.FC<BackupRestoreTabProps> = ({ user, isAdmi
 
   return (
     <div className="space-y-8">
+      {/* SECTION 0: CLOUD FIRESTORE INITIALIZATION & SEEDING */}
+      <div className="bg-gradient-to-br from-red-50/80 via-white to-slate-50 rounded-2xl border border-red-200/80 shadow-xs p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-red-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <CloudUpload className="w-5 h-5 text-red-600" />
+              <h3 className="text-lg font-bold text-slate-900">Inisialisasi Cloud Firestore</h3>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Sinkronkan dan isi seluruh struktur data awal (Berita, Kategori, Tipografi, Navigasi, Penulis, Video, dll.) langsung ke database Cloud Firestore <strong>batutv-portal</strong> milik Anda.
+            </p>
+          </div>
+
+          <div>
+            <button
+              onClick={handleExecuteCloudSeed}
+              disabled={isCloudSeeding || !isAdmin}
+              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-md transition cursor-pointer ${
+                isCloudSeeding || !isAdmin
+                  ? 'bg-slate-300 cursor-not-allowed text-slate-500 shadow-none'
+                  : 'bg-red-600 hover:bg-red-700 active:scale-98'
+              }`}
+            >
+              {isCloudSeeding ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>
+                    Sinkronisasi: {cloudSeedProgress?.currentEntity || 'Memproses...'} ({cloudSeedProgress?.completedEntities || 0}/{cloudSeedProgress?.totalEntities || 11})
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Database className="w-4 h-4" />
+                  <span>Sinkronkan Seluruh Data ke Firestore</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {cloudSeedResult && (
+          <div
+            className={`p-4 rounded-xl border text-xs sm:text-sm flex flex-col gap-2 animate-fade-in ${
+              cloudSeedResult.success
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : 'bg-red-50 border-red-200 text-red-900'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 font-bold">
+              {cloudSeedResult.success ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+              )}
+              <span>{cloudSeedResult.message}</span>
+            </div>
+
+            {cloudSeedResult.summary && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 mt-2 pt-2 border-t border-emerald-200">
+                {Object.entries(cloudSeedResult.summary).map(([col, count]) => (
+                  <div key={col} className="bg-white/80 p-2 rounded-lg border border-emerald-100 text-xs">
+                    <span className="text-slate-500 font-medium capitalize block truncate">{col}</span>
+                    <span className="font-bold text-slate-900">{count} record</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* SECTION 1: EXPORT DATA */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">

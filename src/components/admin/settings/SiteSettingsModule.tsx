@@ -23,6 +23,11 @@ import {
   Check,
   X,
   Code2,
+  SlidersHorizontal,
+  Hash,
+  Menu,
+  PanelBottom,
+  RefreshCw,
 } from 'lucide-react';
 import {
   SiteSettings,
@@ -1509,56 +1514,706 @@ export const SiteSettingsModule: React.FC<SiteSettingsModuleProps> = ({
                 </div>
               </div>
 
-              {/* Typography Live Scale Preview */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-2xs">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                  Pratinjau Hirarki Tipografi:
-                </span>
-
-                <div className="space-y-3">
+              {/* ========================================================= */}
+              {/* SECTION: KONTROL MANUAL TIPOGRAFI KHUSUS                  */}
+              {/* ========================================================= */}
+              <div className="pt-6 border-t border-slate-200 space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <span className="text-[10px] text-slate-400 font-mono block">
-                      Headline Utama H1 (Font: {settings.typography.headingFont}, Weight: {settings.typography.headingWeight || '800'})
-                    </span>
-                    <h1
-                      style={{
-                        fontFamily: settings.typography.headingFont,
-                        fontWeight: settings.typography.headingWeight || '800',
-                      }}
-                      className="text-2xl sm:text-3xl text-slate-900 leading-tight"
-                    >
-                      Wisata Gunung Banyak Kota Batu Catat Lonjakan 15.000 Wisatawan Akhir Pekan
-                    </h1>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-mono block">
-                      Sub-Judul H2 (Font: {settings.typography.headingFont}, Weight: {settings.typography.headingWeight || '700'})
-                    </span>
-                    <h2
-                      style={{
-                        fontFamily: settings.typography.headingFont,
-                        fontWeight: settings.typography.headingWeight || '700',
-                      }}
-                      className="text-lg text-slate-800"
-                    >
-                      Pemerintah Kota Siapkan Rekayasa Lalu Lintas &amp; Tambahan Personel Pengamanan
-                    </h2>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-mono block">
-                      Paragraf Konten Berita (Font: {settings.typography.bodyFont}, Weight: {settings.typography.bodyWeight || '400'})
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: settings.typography.bodyFont,
-                        fontWeight: settings.typography.bodyWeight || '400',
-                      }}
-                      className="text-sm text-slate-600 leading-relaxed max-w-3xl"
-                    >
-                      BATU — Dinas Pariwisata Kota Batu melaporkan kenaikan signifikan jumlah kunjungan wisatawan domestik pada libur panjang kali ini. Sektor perhotelan dan sentra apel mencatatkan okupansi tertinggi sepanjang triwulan pertama tahun 2026.
+                    <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                      <SlidersHorizontal className="w-4 h-4 text-red-600" />
+                      <span>Kontrol Manual Huruf &amp; Tampilan Khusus Per Bagian</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Atur ukuran, ketebalan, jenis huruf, dan format teks secara mandiri untuk Bar Topik, Menu Navigasi, dan Footer.
                     </p>
+                  </div>
+                  <span className="text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-lg w-fit">
+                    Real-time Live Sync
+                  </span>
+                </div>
+
+                <div className="space-y-6">
+                  {/* ---------------------------------------------------- */}
+                  {/* 1. KONTROL MANUAL BAR TOPIK (# TOPIK)                */}
+                  {/* ---------------------------------------------------- */}
+                  <div className="bg-slate-50/80 rounded-2xl border border-slate-200/80 p-5 space-y-5">
+                    <div className="flex items-center justify-between border-b border-slate-200/70 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-black text-xs">
+                          <Hash className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900">Bilah Bar Topik Populer (# TOPIK)</h4>
+                          <p className="text-[11px] text-slate-500">Kustomisasi ukuran dan gaya tag topik di bawah navigasi</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSettings((prev) => ({
+                            ...prev,
+                            typography: {
+                              ...prev.typography,
+                              topicBar: {
+                                fontSize: 11,
+                                fontWeight: '400',
+                                fontFamily: 'inherit',
+                                textTransform: 'none',
+                                badgePadding: 'normal',
+                                badgeBgColor: '#f1f3f5',
+                                badgeTextColor: '#334155',
+                              },
+                            },
+                          }))
+                        }
+                        className="text-[11px] font-semibold text-slate-600 hover:text-red-600 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        <span>Reset Default</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {/* Ukuran Font */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] font-bold text-slate-800">Ukuran Huruf</label>
+                          <span className="text-xs font-mono font-bold text-red-600">
+                            {settings.typography.topicBar?.fontSize || 11}px
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={9}
+                          max={16}
+                          step={0.5}
+                          value={settings.typography.topicBar?.fontSize || 11}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                topicBar: {
+                                  ...prev.typography.topicBar,
+                                  fontSize: parseFloat(e.target.value),
+                                  fontWeight: prev.typography.topicBar?.fontWeight || '400',
+                                  fontFamily: prev.typography.topicBar?.fontFamily || 'inherit',
+                                  textTransform: prev.typography.topicBar?.textTransform || 'none',
+                                  badgePadding: prev.typography.topicBar?.badgePadding || 'normal',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-red-600 cursor-pointer"
+                        />
+                        <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                          <span>9px (Kecil)</span>
+                          <span>11px (Ideal)</span>
+                          <span>16px</span>
+                        </div>
+                      </div>
+
+                      {/* Ketebalan Huruf */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Ketebalan Huruf</label>
+                        <select
+                          value={settings.typography.topicBar?.fontWeight || '400'}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                topicBar: {
+                                  ...prev.typography.topicBar,
+                                  fontSize: prev.typography.topicBar?.fontSize || 11,
+                                  fontWeight: e.target.value as any,
+                                  fontFamily: prev.typography.topicBar?.fontFamily || 'inherit',
+                                  textTransform: prev.typography.topicBar?.textTransform || 'none',
+                                  badgePadding: prev.typography.topicBar?.badgePadding || 'normal',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                        >
+                          <option value="400">Regular (400) — Standar Biasa</option>
+                          <option value="500">Medium (500) — Sedikit Tegas</option>
+                          <option value="600">Semi-Bold (600) — Tebal Sedang</option>
+                          <option value="700">Bold (700) — Tebal Penuh</option>
+                        </select>
+                      </div>
+
+                      {/* Jenis Font Khusus */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Jenis Huruf (Font)</label>
+                        <select
+                          value={settings.typography.topicBar?.fontFamily || 'inherit'}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                topicBar: {
+                                  ...prev.typography.topicBar,
+                                  fontSize: prev.typography.topicBar?.fontSize || 11,
+                                  fontWeight: prev.typography.topicBar?.fontWeight || '400',
+                                  fontFamily: e.target.value,
+                                  textTransform: prev.typography.topicBar?.textTransform || 'none',
+                                  badgePadding: prev.typography.topicBar?.badgePadding || 'normal',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                        >
+                          <option value="inherit">Sesuai Tema Body ({settings.typography.bodyFont})</option>
+                          <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                          <option value="Inter">Inter</option>
+                          <option value="Roboto">Roboto</option>
+                          <option value="Poppins">Poppins</option>
+                          <option value="Montserrat">Montserrat</option>
+                          <option value="Open Sans">Open Sans</option>
+                          <option value="Lato">Lato</option>
+                        </select>
+                      </div>
+
+                      {/* Format Huruf (Text Transform) */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Format Huruf</label>
+                        <select
+                          value={settings.typography.topicBar?.textTransform || 'none'}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                topicBar: {
+                                  ...prev.typography.topicBar,
+                                  fontSize: prev.typography.topicBar?.fontSize || 11,
+                                  fontWeight: prev.typography.topicBar?.fontWeight || '400',
+                                  fontFamily: prev.typography.topicBar?.fontFamily || 'inherit',
+                                  textTransform: e.target.value as any,
+                                  badgePadding: prev.typography.topicBar?.badgePadding || 'normal',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                        >
+                          <option value="none">Asli / Normal (e.g. FestivalApel)</option>
+                          <option value="uppercase">HURUF BESAR (UPPERCASE)</option>
+                          <option value="lowercase">huruf kecil (lowercase)</option>
+                          <option value="capitalize">Kapital Depan (Capitalize)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Additional styling: Badge Padding & Color */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Padding / Spasi Badge</label>
+                        <select
+                          value={settings.typography.topicBar?.badgePadding || 'normal'}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                topicBar: {
+                                  ...prev.typography.topicBar,
+                                  fontSize: prev.typography.topicBar?.fontSize || 11,
+                                  fontWeight: prev.typography.topicBar?.fontWeight || '400',
+                                  fontFamily: prev.typography.topicBar?.fontFamily || 'inherit',
+                                  textTransform: prev.typography.topicBar?.textTransform || 'none',
+                                  badgePadding: e.target.value as any,
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                        >
+                          <option value="compact">Ringkas (Kecil)</option>
+                          <option value="normal">Normal Standar</option>
+                          <option value="spacious">Leluasa (Lebih Lebar)</option>
+                        </select>
+                      </div>
+
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Warna Latar Tag</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={settings.typography.topicBar?.badgeBgColor || '#f1f3f5'}
+                            onChange={(e) =>
+                              setSettings((prev) => ({
+                                ...prev,
+                                typography: {
+                                  ...prev.typography,
+                                  topicBar: {
+                                    ...prev.typography.topicBar,
+                                    fontSize: prev.typography.topicBar?.fontSize || 11,
+                                    fontWeight: prev.typography.topicBar?.fontWeight || '400',
+                                    fontFamily: prev.typography.topicBar?.fontFamily || 'inherit',
+                                    textTransform: prev.typography.topicBar?.textTransform || 'none',
+                                    badgePadding: prev.typography.topicBar?.badgePadding || 'normal',
+                                    badgeBgColor: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
+                          />
+                          <input
+                            type="text"
+                            value={settings.typography.topicBar?.badgeBgColor || '#f1f3f5'}
+                            onChange={(e) =>
+                              setSettings((prev) => ({
+                                ...prev,
+                                typography: {
+                                  ...prev.typography,
+                                  topicBar: {
+                                    ...prev.typography.topicBar,
+                                    fontSize: prev.typography.topicBar?.fontSize || 11,
+                                    fontWeight: prev.typography.topicBar?.fontWeight || '400',
+                                    fontFamily: prev.typography.topicBar?.fontFamily || 'inherit',
+                                    textTransform: prev.typography.topicBar?.textTransform || 'none',
+                                    badgePadding: prev.typography.topicBar?.badgePadding || 'normal',
+                                    badgeBgColor: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full px-2 py-1 text-xs font-mono rounded-lg border border-slate-300"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Warna Teks Tag</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={settings.typography.topicBar?.badgeTextColor || '#334155'}
+                            onChange={(e) =>
+                              setSettings((prev) => ({
+                                ...prev,
+                                typography: {
+                                  ...prev.typography,
+                                  topicBar: {
+                                    ...prev.typography.topicBar,
+                                    fontSize: prev.typography.topicBar?.fontSize || 11,
+                                    fontWeight: prev.typography.topicBar?.fontWeight || '400',
+                                    fontFamily: prev.typography.topicBar?.fontFamily || 'inherit',
+                                    textTransform: prev.typography.topicBar?.textTransform || 'none',
+                                    badgePadding: prev.typography.topicBar?.badgePadding || 'normal',
+                                    badgeTextColor: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
+                          />
+                          <input
+                            type="text"
+                            value={settings.typography.topicBar?.badgeTextColor || '#334155'}
+                            onChange={(e) =>
+                              setSettings((prev) => ({
+                                ...prev,
+                                typography: {
+                                  ...prev.typography,
+                                  topicBar: {
+                                    ...prev.typography.topicBar,
+                                    fontSize: prev.typography.topicBar?.fontSize || 11,
+                                    fontWeight: prev.typography.topicBar?.fontWeight || '400',
+                                    fontFamily: prev.typography.topicBar?.fontFamily || 'inherit',
+                                    textTransform: prev.typography.topicBar?.textTransform || 'none',
+                                    badgePadding: prev.typography.topicBar?.badgePadding || 'normal',
+                                    badgeTextColor: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                            className="w-full px-2 py-1 text-xs font-mono rounded-lg border border-slate-300"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Live Preview Box Bar Topik */}
+                    <div className="bg-slate-100 rounded-xl p-3 border border-slate-300 space-y-2">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                        Live Preview Bar Topik:
+                      </span>
+                      <div className="bg-white border border-[#940a13]/40 rounded-lg shadow-2xs px-3.5 py-2 flex items-center gap-3 overflow-hidden">
+                        <div className="flex items-center gap-1 text-xs font-black text-[#940a13] uppercase tracking-wider flex-shrink-0">
+                          <span># TOPIK</span>
+                        </div>
+                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                          {['Rektor Unsoed Terjaring OTT', 'Gempa Sumut', 'Festival Apel Batu 2026', 'Wisata Malang Raya'].map(
+                            (tag, idx) => (
+                              <span
+                                key={idx}
+                                style={{
+                                  fontSize: `${settings.typography.topicBar?.fontSize || 11}px`,
+                                  fontWeight: settings.typography.topicBar?.fontWeight || '400',
+                                  fontFamily:
+                                    settings.typography.topicBar?.fontFamily &&
+                                    settings.typography.topicBar?.fontFamily !== 'inherit'
+                                      ? settings.typography.topicBar.fontFamily
+                                      : settings.typography.bodyFont,
+                                  textTransform: (settings.typography.topicBar?.textTransform || 'none') as any,
+                                  backgroundColor:
+                                    idx === 0
+                                      ? '#940a13'
+                                      : settings.typography.topicBar?.badgeBgColor || '#f1f3f5',
+                                  color:
+                                    idx === 0
+                                      ? '#ffffff'
+                                      : settings.typography.topicBar?.badgeTextColor || '#334155',
+                                }}
+                                className={`rounded-full whitespace-nowrap ${
+                                  settings.typography.topicBar?.badgePadding === 'compact'
+                                    ? 'px-2 py-0.5'
+                                    : settings.typography.topicBar?.badgePadding === 'spacious'
+                                    ? 'px-3.5 py-1.5'
+                                    : 'px-2.5 py-1'
+                                }`}
+                              >
+                                {tag}
+                              </span>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ---------------------------------------------------- */}
+                  {/* 2. KONTROL MANUAL MENU NAVIGASI UTAMA (HEADER)        */}
+                  {/* ---------------------------------------------------- */}
+                  <div className="bg-slate-50/80 rounded-2xl border border-slate-200/80 p-5 space-y-5">
+                    <div className="flex items-center justify-between border-b border-slate-200/70 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-black text-xs">
+                          <Menu className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900">Menu Navigasi Utama (Header Bar)</h4>
+                          <p className="text-[11px] text-slate-500">Atur ukuran &amp; ketebalan menu navbar merah</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSettings((prev) => ({
+                            ...prev,
+                            typography: {
+                              ...prev.typography,
+                              navigation: {
+                                fontSize: 12.5,
+                                fontWeight: '900',
+                                letterSpacing: 'wide',
+                                textTransform: 'uppercase',
+                              },
+                            },
+                          }))
+                        }
+                        className="text-[11px] font-semibold text-slate-600 hover:text-red-600 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        <span>Reset Default</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {/* Ukuran Font Navigasi */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] font-bold text-slate-800">Ukuran Huruf Menu</label>
+                          <span className="text-xs font-mono font-bold text-red-600">
+                            {settings.typography.navigation?.fontSize || 12.5}px
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={10}
+                          max={16}
+                          step={0.5}
+                          value={settings.typography.navigation?.fontSize || 12.5}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                navigation: {
+                                  ...prev.typography.navigation,
+                                  fontSize: parseFloat(e.target.value),
+                                  fontWeight: prev.typography.navigation?.fontWeight || '900',
+                                  letterSpacing: prev.typography.navigation?.letterSpacing || 'wide',
+                                  textTransform: prev.typography.navigation?.textTransform || 'uppercase',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-red-600 cursor-pointer"
+                        />
+                        <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                          <span>10px</span>
+                          <span>12.5px (Standar)</span>
+                          <span>16px</span>
+                        </div>
+                      </div>
+
+                      {/* Ketebalan Huruf Navigasi */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Ketebalan Huruf</label>
+                        <select
+                          value={settings.typography.navigation?.fontWeight || '900'}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                navigation: {
+                                  ...prev.typography.navigation,
+                                  fontSize: prev.typography.navigation?.fontSize || 12.5,
+                                  fontWeight: e.target.value as any,
+                                  letterSpacing: prev.typography.navigation?.letterSpacing || 'wide',
+                                  textTransform: prev.typography.navigation?.textTransform || 'uppercase',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                        >
+                          <option value="400">Regular (400)</option>
+                          <option value="500">Medium (500)</option>
+                          <option value="600">Semi-Bold (600)</option>
+                          <option value="700">Bold (700)</option>
+                          <option value="800">Extra-Bold (800)</option>
+                          <option value="900">Black (900) — TVOne Bold Style</option>
+                        </select>
+                      </div>
+
+                      {/* Spasi Antar Huruf */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Spasi Huruf (Letter Spacing)</label>
+                        <select
+                          value={settings.typography.navigation?.letterSpacing || 'wide'}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                navigation: {
+                                  ...prev.typography.navigation,
+                                  fontSize: prev.typography.navigation?.fontSize || 12.5,
+                                  fontWeight: prev.typography.navigation?.fontWeight || '900',
+                                  letterSpacing: e.target.value as any,
+                                  textTransform: prev.typography.navigation?.textTransform || 'uppercase',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                        >
+                          <option value="tight">Rapat (Tight)</option>
+                          <option value="normal">Normal</option>
+                          <option value="wide">Lebar (Wide)</option>
+                          <option value="wider">Sangat Lebar (Wider)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Live Preview Box Header Navbar */}
+                    <div className="bg-slate-900 rounded-xl p-3 border border-slate-800 space-y-2">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Live Preview Bilah Navigasi:
+                      </span>
+                      <div className="bg-[#940a13] rounded-lg px-3 py-2 flex items-center gap-4 text-white overflow-x-auto">
+                        {['HOME', 'BERITA', 'DAERAH', 'EKONOMI', 'WISATA', 'VIDEO', 'STREAMING'].map((m, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              fontSize: `${settings.typography.navigation?.fontSize || 12.5}px`,
+                              fontWeight: settings.typography.navigation?.fontWeight || '900',
+                            }}
+                            className="uppercase tracking-wide whitespace-nowrap hover:bg-[#c81e28] px-2 py-0.5 rounded cursor-pointer transition-colors"
+                          >
+                            {m}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ---------------------------------------------------- */}
+                  {/* 3. KONTROL MANUAL MENU NAVIGASI FOOTER                */}
+                  {/* ---------------------------------------------------- */}
+                  <div className="bg-slate-50/80 rounded-2xl border border-slate-200/80 p-5 space-y-5">
+                    <div className="flex items-center justify-between border-b border-slate-200/70 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-black text-xs">
+                          <PanelBottom className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900">Menu Tautan Footer Portal</h4>
+                          <p className="text-[11px] text-slate-500">Atur ukuran huruf &amp; jarak baris link Tentang Kami, Redaksi, Pedoman Siber, dll.</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSettings((prev) => ({
+                            ...prev,
+                            typography: {
+                              ...prev.typography,
+                              footerMenu: {
+                                fontSize: 13,
+                                fontWeight: '700',
+                                gap: 'normal',
+                                textColor: '#ffffff',
+                                hoverColor: '#ef4444',
+                              },
+                            },
+                          }))
+                        }
+                        className="text-[11px] font-semibold text-slate-600 hover:text-red-600 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        <span>Reset Default</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {/* Ukuran Font Footer */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] font-bold text-slate-800">Ukuran Huruf Link</label>
+                          <span className="text-xs font-mono font-bold text-red-600">
+                            {settings.typography.footerMenu?.fontSize || 13}px
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={10}
+                          max={18}
+                          step={0.5}
+                          value={settings.typography.footerMenu?.fontSize || 13}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                footerMenu: {
+                                  ...prev.typography.footerMenu,
+                                  fontSize: parseFloat(e.target.value),
+                                  fontWeight: prev.typography.footerMenu?.fontWeight || '700',
+                                  gap: prev.typography.footerMenu?.gap || 'normal',
+                                  textColor: prev.typography.footerMenu?.textColor || '#ffffff',
+                                  hoverColor: prev.typography.footerMenu?.hoverColor || '#ef4444',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full accent-red-600 cursor-pointer"
+                        />
+                        <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                          <span>10px</span>
+                          <span>13px (Standar)</span>
+                          <span>18px</span>
+                        </div>
+                      </div>
+
+                      {/* Ketebalan Huruf Footer */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Ketebalan Huruf</label>
+                        <select
+                          value={settings.typography.footerMenu?.fontWeight || '700'}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                footerMenu: {
+                                  ...prev.typography.footerMenu,
+                                  fontSize: prev.typography.footerMenu?.fontSize || 13,
+                                  fontWeight: e.target.value as any,
+                                  gap: prev.typography.footerMenu?.gap || 'normal',
+                                  textColor: prev.typography.footerMenu?.textColor || '#ffffff',
+                                  hoverColor: prev.typography.footerMenu?.hoverColor || '#ef4444',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                        >
+                          <option value="400">Regular (400) — Halus</option>
+                          <option value="500">Medium (500)</option>
+                          <option value="600">Semi-Bold (600)</option>
+                          <option value="700">Bold (700) — Standar Putih Tebal</option>
+                        </select>
+                      </div>
+
+                      {/* Jarak Antar Link Footer */}
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-800 block">Jarak Antar Link</label>
+                        <select
+                          value={settings.typography.footerMenu?.gap || 'normal'}
+                          onChange={(e) =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              typography: {
+                                ...prev.typography,
+                                footerMenu: {
+                                  ...prev.typography.footerMenu,
+                                  fontSize: prev.typography.footerMenu?.fontSize || 13,
+                                  fontWeight: prev.typography.footerMenu?.fontWeight || '700',
+                                  gap: e.target.value as any,
+                                  textColor: prev.typography.footerMenu?.textColor || '#ffffff',
+                                  hoverColor: prev.typography.footerMenu?.hoverColor || '#ef4444',
+                                },
+                              },
+                            }))
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                        >
+                          <option value="compact">Rapat (Compact)</option>
+                          <option value="normal">Normal Standar</option>
+                          <option value="spacious">Leluasa (Spacious)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Live Preview Box Footer Menu */}
+                    <div className="bg-[#222222] rounded-xl p-4 text-center space-y-2 border border-slate-800">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Live Preview Navigasi Footer:
+                      </span>
+                      <div
+                        style={{
+                          fontSize: `${settings.typography.footerMenu?.fontSize || 13}px`,
+                          fontWeight: settings.typography.footerMenu?.fontWeight || '700',
+                          color: settings.typography.footerMenu?.textColor || '#ffffff',
+                        }}
+                        className={`flex flex-wrap items-center justify-center ${
+                          settings.typography.footerMenu?.gap === 'compact'
+                            ? 'gap-x-3 gap-y-1.5'
+                            : settings.typography.footerMenu?.gap === 'spacious'
+                            ? 'gap-x-8 gap-y-3'
+                            : 'gap-x-5 gap-y-2'
+                        }`}
+                      >
+                        {['Tentang Kami', 'Redaksi', 'Kontak', 'Karir', 'Pedoman Media Siber', 'Kode Etik', 'Disclaimer', 'Privacy Policy'].map(
+                          (link, idx) => (
+                            <span key={idx} className="hover:text-red-500 transition-colors cursor-pointer">
+                              {link}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

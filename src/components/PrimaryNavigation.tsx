@@ -182,91 +182,121 @@ export const PrimaryNavigation: React.FC<PrimaryNavigationProps> = ({
             <div className="flex items-center h-full overflow-visible">
               {/* Navigation Category List */}
               <div className="navigation-list-wrapper flex items-center overflow-x-auto md:overflow-visible no-scrollbar h-full">
-                <ul className="navigation-list flex items-center justify-start text-[11.5px] sm:text-[12px] lg:text-[12.5px] font-black tracking-wide whitespace-nowrap h-full">
-                  {navTree.map((item) => {
-                    const hasChildren = Boolean(item.children && item.children.length > 0);
-                    const isActive = isNavItemActive(item, currentPath, activeSlug);
-                    const isDropdownOpen = openDropdownId === item.id;
-                    const isHomeIcon = item.slug === 'home' || item.icon === 'home';
+                {(() => {
+                  const navTypo = siteSettings?.typography?.navigation || {
+                    fontSize: 12.5,
+                    fontWeight: '900',
+                    letterSpacing: 'wide',
+                    textTransform: 'uppercase',
+                  };
 
-                    return (
-                      <li
-                        key={item.id}
-                        className="navigation-item relative group flex-shrink-0 h-full flex items-center"
-                        onMouseEnter={() => hasChildren && setOpenDropdownId(item.id)}
-                        onMouseLeave={() => hasChildren && setOpenDropdownId(null)}
-                      >
-                        {/* LEVEL 1: PARENT MENU LINK */}
-                        <a
-                          id={`s02-nav-${item.slug}`}
-                          href={item.url}
-                          target={item.openNewTab ? '_blank' : undefined}
-                          rel={item.openNewTab ? 'noopener noreferrer' : undefined}
-                          onClick={(e) => handleLinkClick(e, item, item.slug, item.url)}
-                          aria-haspopup={hasChildren ? 'true' : undefined}
-                          aria-expanded={hasChildren ? (isDropdownOpen ? 'true' : 'false') : undefined}
-                          aria-current={isActive ? 'page' : undefined}
-                          className={`nav-link menu-hover-animated h-full inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 font-black uppercase tracking-wide transition-all duration-200 relative focus:outline-none focus-visible:ring-1 focus-visible:ring-white/80 text-white ${
-                            isDropdownOpen
-                              ? 'bg-[#c81e28] text-white shadow-inner'
-                              : 'hover:bg-[#c81e28] hover:text-white'
-                          }`}
-                        >
-                          {isHomeIcon ? (
-                            <span className="flex items-center justify-center p-0.5" title={item.label || 'Home'}>
-                              <Home className="w-4 h-4 text-white shrink-0 stroke-[2.4]" aria-hidden="true" />
-                              <span className="sr-only">{item.label || 'Home'}</span>
-                            </span>
-                          ) : (
-                            <span>{item.label}</span>
-                          )}
-                        </a>
+                  const getLetterSpacingVal = (spacing?: string) => {
+                    if (spacing === 'tight') return '-0.025em';
+                    if (spacing === 'normal') return '0em';
+                    if (spacing === 'wider') return '0.05em';
+                    return '0.025em';
+                  };
 
-                        {/* LEVEL 2: SUBMENU / DROPDOWN CONTAINER WITH PROPORTIONAL GAP & ROUNDED CORNERS */}
-                        {hasChildren && (
-                          <div
-                            className={`absolute top-full left-0 pt-1 sm:pt-1.5 z-50 min-w-[145px] max-w-[220px] transition-all duration-150 ease-out ${
-                              isDropdownOpen
-                                ? 'opacity-100 visible translate-y-0 pointer-events-auto'
-                                : 'opacity-0 invisible -translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:pointer-events-auto'
-                            }`}
+                  const sharedMenuStyle: React.CSSProperties = {
+                    fontSize: navTypo.fontSize ? `${navTypo.fontSize}px` : '12.5px',
+                    fontWeight: navTypo.fontWeight ? (navTypo.fontWeight as any) : '900',
+                    letterSpacing: getLetterSpacingVal(navTypo.letterSpacing),
+                    textTransform: (navTypo.textTransform || 'uppercase') as React.CSSProperties['textTransform'],
+                  };
+
+                  return (
+                    <ul
+                      style={sharedMenuStyle}
+                      className="navigation-list flex items-center justify-start text-[11.5px] sm:text-[12px] lg:text-[12.5px] font-black tracking-wide whitespace-nowrap h-full"
+                    >
+                      {navTree.map((item) => {
+                        const hasChildren = Boolean(item.children && item.children.length > 0);
+                        const isActive = isNavItemActive(item, currentPath, activeSlug);
+                        const isDropdownOpen = openDropdownId === item.id;
+                        const isHomeIcon = item.slug === 'home' || item.icon === 'home';
+
+                        return (
+                          <li
+                            key={item.id}
+                            className="navigation-item relative group flex-shrink-0 h-full flex items-center"
+                            onMouseEnter={() => hasChildren && setOpenDropdownId(item.id)}
+                            onMouseLeave={() => hasChildren && setOpenDropdownId(null)}
                           >
-                            <ul
-                              role="menu"
-                              aria-label={`Submenu ${item.label}`}
-                              className="bg-[#c0232a] rounded-lg shadow-2xl overflow-hidden divide-y divide-black/15 border border-black/10"
+                            {/* LEVEL 1: PARENT MENU LINK */}
+                            <a
+                              id={`s02-nav-${item.slug}`}
+                              href={item.url}
+                              target={item.openNewTab ? '_blank' : undefined}
+                              rel={item.openNewTab ? 'noopener noreferrer' : undefined}
+                              onClick={(e) => handleLinkClick(e, item, item.slug, item.url)}
+                              aria-haspopup={hasChildren ? 'true' : undefined}
+                              aria-expanded={hasChildren ? (isDropdownOpen ? 'true' : 'false') : undefined}
+                              aria-current={isActive ? 'page' : undefined}
+                              style={sharedMenuStyle}
+                              className={`nav-link menu-hover-animated h-full inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 transition-all duration-200 relative focus:outline-none focus-visible:ring-1 focus-visible:ring-white/80 text-white ${
+                                isDropdownOpen
+                                  ? 'bg-[#c81e28] text-white shadow-inner'
+                                  : 'hover:bg-[#c81e28] hover:text-white'
+                              }`}
                             >
-                              {item.children!.map((child) => {
-                                const isChildActive = isNavItemActive(child, currentPath, activeSlug);
+                              {isHomeIcon ? (
+                                <span className="flex items-center justify-center p-0.5" title={item.label || 'Home'}>
+                                  <Home className="w-4 h-4 text-white shrink-0 stroke-[2.4]" aria-hidden="true" />
+                                  <span className="sr-only">{item.label || 'Home'}</span>
+                                </span>
+                              ) : (
+                                <span>{item.label}</span>
+                              )}
+                            </a>
 
-                                return (
-                                  <li key={child.id} role="none">
-                                    <a
-                                      id={`s02-subnav-${child.slug}`}
-                                      href={child.url}
-                                      role="menuitem"
-                                      target={child.openNewTab ? '_blank' : undefined}
-                                      rel={child.openNewTab ? 'noopener noreferrer' : undefined}
-                                      aria-current={isChildActive ? 'page' : undefined}
-                                      onClick={(e) => handleLinkClick(e, child, child.slug, child.url)}
-                                      className={`block px-4 py-2 text-[11.5px] sm:text-[12px] font-black text-white uppercase tracking-wider text-left transition-colors duration-150 focus:outline-none ${
-                                        isChildActive
-                                          ? 'bg-[#9f151c] text-white font-black'
-                                          : 'hover:bg-[#d4272f] hover:text-white'
-                                      }`}
-                                    >
-                                      {child.label}
-                                    </a>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                            {/* LEVEL 2: SUBMENU / DROPDOWN CONTAINER WITH PROPORTIONAL GAP & ROUNDED CORNERS */}
+                            {hasChildren && (
+                              <div
+                                className={`absolute top-full left-0 pt-1 sm:pt-1.5 z-50 min-w-[145px] max-w-[220px] transition-all duration-150 ease-out ${
+                                  isDropdownOpen
+                                    ? 'opacity-100 visible translate-y-0 pointer-events-auto'
+                                    : 'opacity-0 invisible -translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:pointer-events-auto'
+                                }`}
+                              >
+                                <ul
+                                  role="menu"
+                                  aria-label={`Submenu ${item.label}`}
+                                  className="bg-[#c0232a] rounded-lg shadow-2xl overflow-hidden divide-y divide-black/15 border border-black/10"
+                                >
+                                  {item.children!.map((child) => {
+                                    const isChildActive = isNavItemActive(child, currentPath, activeSlug);
+
+                                    return (
+                                      <li key={child.id} role="none">
+                                        <a
+                                          id={`s02-subnav-${child.slug}`}
+                                          href={child.url}
+                                          role="menuitem"
+                                          target={child.openNewTab ? '_blank' : undefined}
+                                          rel={child.openNewTab ? 'noopener noreferrer' : undefined}
+                                          aria-current={isChildActive ? 'page' : undefined}
+                                          onClick={(e) => handleLinkClick(e, child, child.slug, child.url)}
+                                          style={sharedMenuStyle}
+                                          className={`block px-4 py-2 text-white text-left transition-colors duration-150 focus:outline-none whitespace-nowrap ${
+                                            isChildActive
+                                              ? 'bg-[#9f151c] text-white'
+                                              : 'hover:bg-[#d4272f] hover:text-white'
+                                          }`}
+                                        >
+                                          {child.label}
+                                        </a>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  );
+                })()}
               </div>
             </div>
 

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateTagSlug } from '../data/tagAdminStore';
+import { getStoredSiteSettings, SITE_SETTINGS_UPDATED_EVENT } from '../data/siteSettingsStore';
 
 interface TrendingTopicsBarProps {
   topics?: string[];
@@ -25,6 +26,42 @@ export const TrendingTopicsBar: React.FC<TrendingTopicsBarProps> = ({
   activeTopic,
 }) => {
   const displayTopics = topics && topics.length > 0 ? topics : DEFAULT_FEATURED_TOPICS;
+  const [siteSettings, setSiteSettings] = useState(() => getStoredSiteSettings());
+
+  useEffect(() => {
+    const handleUpdate = (e: CustomEvent) => {
+      if (e.detail) {
+        setSiteSettings(e.detail);
+      }
+    };
+    window.addEventListener(SITE_SETTINGS_UPDATED_EVENT as any, handleUpdate);
+    return () => {
+      window.removeEventListener(SITE_SETTINGS_UPDATED_EVENT as any, handleUpdate);
+    };
+  }, []);
+
+  const topicTypography = siteSettings?.typography?.topicBar || {
+    fontSize: 11,
+    fontWeight: '400',
+    fontFamily: 'inherit',
+    textTransform: 'none',
+    badgePadding: 'normal',
+    badgeBgColor: '#f1f3f5',
+    badgeTextColor: '#334155',
+  };
+
+  const getPaddingClass = (padding?: string) => {
+    if (padding === 'compact') return 'px-2 py-0.5';
+    if (padding === 'spacious') return 'px-3.5 py-1 sm:py-1.5';
+    return 'px-2.5 py-0.5 sm:py-1';
+  };
+
+  const getTextTransformStyle = (transform?: string): React.CSSProperties['textTransform'] => {
+    if (transform === 'uppercase') return 'uppercase';
+    if (transform === 'capitalize') return 'capitalize';
+    if (transform === 'lowercase') return 'lowercase';
+    return 'none';
+  };
 
   return (
     <div id="trending-topics-bar" className="w-full bg-transparent py-1.5 sm:py-2">
@@ -37,7 +74,7 @@ export const TrendingTopicsBar: React.FC<TrendingTopicsBarProps> = ({
 
           {/* Tags List with invisible scrollbar */}
           <div
-            className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 text-xs font-bold text-slate-800 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 text-slate-700 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {displayTopics.map((topic, idx) => {
@@ -54,10 +91,27 @@ export const TrendingTopicsBar: React.FC<TrendingTopicsBarProps> = ({
                     e.preventDefault();
                     onSelectTopic(cleanTopic);
                   }}
-                  className={`text-[11.5px] sm:text-xs px-3 py-1 rounded-full font-bold whitespace-nowrap transition cursor-pointer ${
+                  style={{
+                    fontSize: topicTypography.fontSize ? `${topicTypography.fontSize}px` : undefined,
+                    fontWeight: topicTypography.fontWeight || 400,
+                    fontFamily:
+                      topicTypography.fontFamily && topicTypography.fontFamily !== 'inherit'
+                        ? topicTypography.fontFamily
+                        : undefined,
+                    textTransform: getTextTransformStyle(topicTypography.textTransform),
+                    backgroundColor: isSelected
+                      ? undefined
+                      : topicTypography.badgeBgColor || undefined,
+                    color: isSelected
+                      ? undefined
+                      : topicTypography.badgeTextColor || undefined,
+                  }}
+                  className={`text-[10px] sm:text-[11px] ${getPaddingClass(
+                    topicTypography.badgePadding
+                  )} rounded-full whitespace-nowrap transition cursor-pointer ${
                     isSelected
-                      ? 'bg-[#940a13] text-white shadow-2xs'
-                      : 'bg-[#f1f3f5] text-slate-800 hover:bg-red-50 hover:text-[#940a13]'
+                      ? 'bg-[#940a13] text-white font-medium shadow-2xs'
+                      : 'hover:bg-red-50 hover:text-[#940a13]'
                   }`}
                 >
                   {cleanTopic}
