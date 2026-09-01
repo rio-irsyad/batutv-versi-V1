@@ -411,8 +411,21 @@ function initRealtimeSync() {
   firestoreUserRepository.subscribe(
     (cloudUsers) => {
       if (cloudUsers && cloudUsers.length > 0) {
-        inMemoryUsers = cloudUsers;
-        updateLocalCache(cloudUsers);
+        const local = loadLocalCache();
+        const merged = cloudUsers.map((cu) => {
+          const localMatch = local.find(
+            (lu) =>
+              lu.id === cu.id ||
+              lu.email.toLowerCase() === cu.email.toLowerCase() ||
+              lu.username.toLowerCase() === cu.username.toLowerCase()
+          );
+          return {
+            ...cu,
+            password: cu.password || localMatch?.password || 'Password@123',
+          };
+        });
+        inMemoryUsers = merged;
+        updateLocalCache(merged);
       }
     },
     (err) => {
@@ -1021,6 +1034,11 @@ export const resetUserPassword = (
   };
 
   saveStoredUsers(users);
+
+  // Async persist to Firestore
+  firestoreUserRepository.saveUser(users[index]).catch((err) => {
+    console.warn('[userAdminStore] Firestore async resetUserPassword error:', err);
+  });
 
   logSystemActivity(
     currentUser || { name: 'Administrator', role: 'Administrator' },

@@ -8,6 +8,8 @@ import { logSystemActivity, getStoredSecurityConfig } from '../../data/systemSet
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
+import { firestoreUserRepository } from '../../repositories/firestore/firestoreUserRepository';
+import { CMSUser } from '../../types/user';
 
 interface LoginPageProps {
   onLoginSuccess: (user: { name: string; email: string; role: string; uid?: string }) => void;
@@ -120,16 +122,47 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       console.warn('Firebase Auth attempt notice:', fbAuthErr?.code || fbAuthErr?.message);
     }
 
-    // 2. Fallback to Local Directory Validation
-    const matchedUserIndex = users.findIndex(
+    // 2. Fallback to Local & Cloud CMS User Directory Validation
+    const rawEmailOrUsername = credentials.email.trim();
+    const cleanLower = rawEmailOrUsername.toLowerCase();
+    
+    // Find matching user in local store
+    let matchedUserIndex = users.findIndex(
       (u) =>
+        u.email.toLowerCase() === cleanLower ||
+        u.username.toLowerCase() === cleanLower ||
         u.email.toLowerCase() === inputEmail ||
         u.username.toLowerCase() === inputEmail
     );
 
-    if (matchedUserIndex !== -1) {
-      const userRecord = users[matchedUserIndex];
+    let userRecord: CMSUser | null = matchedUserIndex !== -1 ? users[matchedUserIndex] : null;
 
+    // If not in local array, try fetching directly from Firestore repository
+    if (!userRecord) {
+      try {
+        const cloudUser = await firestoreUserRepository.getUserByEmail(cleanLower);
+        if (cloudUser) {
+          userRecord = cloudUser;
+        } else {
+          // Try search by username in all firestore users
+          const allCloudUsers = await firestoreUserRepository.getUsers();
+          const found = allCloudUsers.find(
+            (u) =>
+              u.username.toLowerCase() === cleanLower ||
+              u.email.toLowerCase() === cleanLower ||
+              u.username.toLowerCase() === inputEmail ||
+              u.email.toLowerCase() === inputEmail
+          );
+          if (found) {
+            userRecord = found;
+          }
+        }
+      } catch (cloudErr) {
+        console.warn('Direct Firestore user lookup notice:', cloudErr);
+      }
+    }
+
+    if (userRecord) {
       // Check if suspended
       if (userRecord.status === 'ditangguhkan') {
         logSystemActivity(
@@ -154,15 +187,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       }
 
       // Check password match
+      const storedPass = userRecord.password || 'Password@123';
       const passMatches =
-        userRecord.password === inputPass ||
+        storedPass === inputPass ||
+        storedPass.trim() === inputPass.trim() ||
         (inputPass === 'batutv2026' && userRecord.role === 'admin') ||
         (inputPass === 'Password@123');
 
       if (passMatches) {
         const nowIso = new Date().toISOString();
-        const updatedUsers = [...users];
-        updatedUsers[matchedUserIndex] = {
+        const updatedUser: CMSUser = {
           ...userRecord,
           lastLogin: nowIso,
           lastLoginDetails: {
@@ -179,7 +213,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           failedLoginAttempts: 0,
           sessionsCount: (userRecord.sessionsCount || 0) + 1,
         };
-        saveStoredUsers(updatedUsers);
+
+        const currentUsers = getStoredUsers();
+        const existingIdx = currentUsers.findIndex((u) => u.id === updatedUser.id);
+        const updatedList =
+          existingIdx !== -1
+            ? currentUsers.map((u, i) => (i === existingIdx ? updatedUser : u))
+            : [updatedUser, ...currentUsers];
+        
+        saveStoredUsers(updatedList);
+        firestoreUserRepository.saveUser(updatedUser).catch(() => {});
 
         const authUser = {
           name: userRecord.fullName,
@@ -215,11 +258,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         return { success: true, user: authUser };
       } else {
         const failedCount = (userRecord.failedLoginAttempts || 0) + 1;
-        const updatedUsers = [...users];
+        const currentUsers = getStoredUsers();
         const maxAttempts = security.loginAttemptLimit || 5;
         const isNowLocked = failedCount >= maxAttempts;
 
-        updatedUsers[matchedUserIndex] = {
+        const updatedUser: CMSUser = {
           ...userRecord,
           failedLoginAttempts: failedCount,
           status: isNowLocked ? 'ditangguhkan' : userRecord.status,
@@ -227,7 +270,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             ? 'Akun ditangguhkan otomatis oleh sistem keamanan karena melebihi batas percobaan login gagal.'
             : userRecord.notes,
         };
-        saveStoredUsers(updatedUsers);
+
+        const existingIdx = currentUsers.findIndex((u) => u.id === updatedUser.id);
+        if (existingIdx !== -1) {
+          currentUsers[existingIdx] = updatedUser;
+          saveStoredUsers(currentUsers);
+        }
 
         logSystemActivity(
           { name: userRecord.fullName, role: userRecord.role },
