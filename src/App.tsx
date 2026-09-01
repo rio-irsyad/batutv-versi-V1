@@ -67,6 +67,11 @@ import {
   isStaticPagePublished,
 } from './utils/slugResolver';
 import {
+  getStoredAdminSession,
+  saveAdminSession,
+  clearAdminSession,
+} from './utils/authSession';
+import {
   getStoredSiteSettings,
   applySiteSettingsToDOM,
   SITE_SETTINGS_UPDATED_EVENT,
@@ -95,23 +100,9 @@ export default function App() {
     name: string;
     email: string;
     role: string;
+    uid?: string;
   } | null>(() => {
-    try {
-      const saved = localStorage.getItem('batutv_admin_session');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object' && (parsed.email || parsed.role)) {
-          return {
-            name: parsed.name || 'Super Administrator BatuTV',
-            email: parsed.email || 'admin@batutv.com',
-            role: parsed.role || 'Administrator',
-          };
-        }
-      }
-      return null;
-    } catch {
-      return null;
-    }
+    return getStoredAdminSession();
   });
 
   // Sync route with browser history
@@ -172,14 +163,10 @@ export default function App() {
             name: userName,
             email: fbUser.email || 'admin@batutv.id',
             role: formattedRole,
+            uid: fbUser.uid,
           };
 
-          try {
-            localStorage.setItem('batutv_admin_session', JSON.stringify(newAuthData));
-          } catch {
-            // ignore
-          }
-
+          saveAdminSession(newAuthData);
           setAuthAdmin(newAuthData);
         } catch (err) {
           console.warn('Error hydrating auth state:', err);
@@ -205,11 +192,7 @@ export default function App() {
     } catch {
       // ignore
     }
-    try {
-      localStorage.removeItem('batutv_admin_session');
-    } catch {
-      // ignore
-    }
+    clearAdminSession();
     setAuthAdmin(null);
     navigateTo('/batutv-control/login');
   };
@@ -496,20 +479,7 @@ export default function App() {
               'success',
               'Auth'
             );
-            try {
-              localStorage.setItem(
-                'batutv_admin_session',
-                JSON.stringify({
-                  name: user.name,
-                  email: user.email,
-                  role: user.role,
-                  uid: (user as any).uid || 'admin',
-                  timestamp: Date.now(),
-                })
-              );
-            } catch {
-              // ignore
-            }
+            saveAdminSession(user);
             setAuthAdmin(user);
             const targetPath =
               currentPath && currentPath !== '/batutv-control/login'

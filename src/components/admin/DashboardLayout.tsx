@@ -18,6 +18,7 @@ import { UserManagementModule } from './user/UserManagementModule';
 import { AccessDeniedModule } from './common/AccessDeniedModule';
 import { checkRoutePermission } from '../../utils/rbac';
 import { AdminUser } from '../../types/admin';
+import { getStoredAdminSession } from '../../utils/authSession';
 
 interface DashboardLayoutProps {
   currentPath: string;
@@ -33,6 +34,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   onLogout,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const effectiveUser = user || getStoredAdminSession();
 
   // Get Page Title from current path
   const getPageTitle = (path: string) => {
@@ -90,7 +92,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // Render appropriate view based on route and RBAC permission
   const renderContent = () => {
     // 1. Central RBAC Route Guard
-    const permission = checkRoutePermission(user?.role, currentPath);
+    const permission = checkRoutePermission(effectiveUser?.role, currentPath);
     if (!permission.allowed) {
       return (
         <AccessDeniedModule
@@ -98,7 +100,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           moduleName={permission.moduleName}
           requiredRoleName={permission.requiredRoleName}
           reason={permission.reason}
-          user={user}
+          user={effectiveUser}
           onNavigate={onNavigate}
           onLogout={onLogout}
         />
@@ -111,7 +113,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <NewsManagementModule
           currentPath={currentPath}
           onNavigate={onNavigate}
-          currentUser={user}
+          currentUser={effectiveUser}
         />
       );
     }
@@ -123,14 +125,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           currentPath={currentPath}
           onNavigate={onNavigate}
           onNavigateToPublic={onNavigate}
-          currentUser={user}
+          currentUser={effectiveUser}
         />
       );
     }
 
     switch (currentPath) {
       case '/batutv-control/dashboard':
-        return <DashboardPage user={user} onNavigate={onNavigate} />;
+        return <DashboardPage user={effectiveUser} onNavigate={onNavigate} />;
 
       case '/batutv-control/kategori':
         return <CategoryManagementModule onNavigateToPublic={onNavigate} />;
@@ -173,7 +175,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case '/batutv-control/pengguna':
         return (
           <UserManagementModule
-            currentUser={user}
+            currentUser={effectiveUser}
             onNavigateToSettings={() => onNavigate('/batutv-control/pengaturan')}
             onNavigateToAuthors={() => onNavigate('/batutv-control/penulis')}
           />
@@ -182,13 +184,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case '/batutv-control/pengaturan':
         return (
           <SystemSettingsModule
-            currentUser={user}
+            currentUser={effectiveUser}
             onNavigate={onNavigate}
           />
         );
 
       default:
-        return <DashboardPage user={user} onNavigate={onNavigate} />;
+        return <DashboardPage user={effectiveUser} onNavigate={onNavigate} />;
     }
   };
 
@@ -201,14 +203,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         onClose={() => setIsSidebarOpen(false)}
         onNavigate={onNavigate}
         onLogout={onLogout}
-        user={user}
+        user={effectiveUser}
       />
 
       {/* MAIN WRAPPER (Offset on desktop for fixed sidebar) */}
       <div className="lg:pl-64 flex flex-col flex-1 min-w-0 transition-all duration-300">
         {/* A02.2 — TOPBAR */}
         <Topbar
-          user={user}
+          user={effectiveUser}
           pageTitle={getPageTitle(currentPath)}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           onLogout={onLogout}

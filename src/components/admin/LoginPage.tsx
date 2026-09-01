@@ -5,6 +5,7 @@ import { LoginCredentials, LoginResponse } from '../../types/auth';
 import { ArrowLeft, X, ShieldAlert, KeyRound, Mail, CheckCircle2 } from 'lucide-react';
 import { getStoredUsers, saveStoredUsers, ROLE_PERMISSIONS_MATRIX } from '../../data/userAdminStore';
 import { logSystemActivity, getStoredSecurityConfig } from '../../data/systemSettingsStore';
+import { saveAdminSession } from '../../utils/authSession';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
@@ -93,20 +94,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         uid: fbUser.uid,
       };
 
-      try {
-        localStorage.setItem(
-          'batutv_admin_session',
-          JSON.stringify({
-            name: authUser.name,
-            email: authUser.email,
-            role: authUser.role,
-            uid: authUser.uid,
-            timestamp: Date.now(),
-          })
-        );
-      } catch {
-        // ignore
-      }
+      saveAdminSession(authUser);
 
       logSystemActivity(
         { name: authUser.name, role: authUser.role },
@@ -231,20 +219,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           uid: userRecord.id,
         };
 
-        try {
-          localStorage.setItem(
-            'batutv_admin_session',
-            JSON.stringify({
-              name: authUser.name,
-              email: userRecord.email,
-              role: authUser.role,
-              uid: authUser.uid,
-              timestamp: Date.now(),
-            })
-          );
-        } catch {
-          // ignore
-        }
+        saveAdminSession(authUser);
 
         logSystemActivity(
           { name: authUser.name, role: authUser.role },
@@ -324,20 +299,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         uid: 'demo-admin',
       };
 
-      try {
-        localStorage.setItem(
-          'batutv_admin_session',
-          JSON.stringify({
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            uid: user.uid,
-            timestamp: Date.now(),
-          })
-        );
-      } catch {
-        // ignore
-      }
+      saveAdminSession(user);
 
       logSystemActivity(
         { name: user.name, role: user.role },
