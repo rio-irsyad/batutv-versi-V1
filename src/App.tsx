@@ -146,11 +146,19 @@ export default function App() {
             ROLE_PERMISSIONS_MATRIX[userRole as keyof typeof ROLE_PERMISSIONS_MATRIX]?.name ||
             userRole;
 
-          setAuthAdmin({
+          const newAuthData = {
             name: userName,
             email: fbUser.email || 'admin@batutv.id',
             role: formattedRole,
-          });
+          };
+
+          try {
+            localStorage.setItem('batutv_admin_session', JSON.stringify(newAuthData));
+          } catch {
+            // ignore
+          }
+
+          setAuthAdmin(newAuthData);
         } catch (err) {
           console.warn('Error hydrating auth state:', err);
         }
@@ -467,7 +475,11 @@ export default function App() {
               'Auth'
             );
             setAuthAdmin(user);
-            navigateTo('/batutv-control/dashboard');
+            const targetPath =
+              currentPath && currentPath !== '/batutv-control/login'
+                ? currentPath
+                : '/batutv-control/dashboard';
+            navigateTo(targetPath);
           }}
           onNavigateHome={() => navigateTo('/')}
         />

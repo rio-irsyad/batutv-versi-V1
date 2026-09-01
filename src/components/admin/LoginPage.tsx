@@ -91,20 +91,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         uid: fbUser.uid,
       };
 
-      if (credentials.rememberMe) {
-        try {
-          localStorage.setItem(
-            'batutv_admin_session',
-            JSON.stringify({
-              email: authUser.email,
-              role: authUser.role,
-              uid: authUser.uid,
-              timestamp: Date.now(),
-            })
-          );
-        } catch {
-          // ignore
-        }
+      try {
+        localStorage.setItem(
+          'batutv_admin_session',
+          JSON.stringify({
+            name: authUser.name,
+            email: authUser.email,
+            role: authUser.role,
+            uid: authUser.uid,
+            timestamp: Date.now(),
+          })
+        );
+      } catch {
+        // ignore
       }
 
       logSystemActivity(
@@ -189,20 +188,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           uid: userRecord.id,
         };
 
-        if (credentials.rememberMe) {
-          try {
-            localStorage.setItem(
-              'batutv_admin_session',
-              JSON.stringify({
-                email: userRecord.email,
-                role: authUser.role,
-                uid: authUser.uid,
-                timestamp: Date.now(),
-              })
-            );
-          } catch {
-            // ignore
-          }
+        try {
+          localStorage.setItem(
+            'batutv_admin_session',
+            JSON.stringify({
+              name: authUser.name,
+              email: userRecord.email,
+              role: authUser.role,
+              uid: authUser.uid,
+              timestamp: Date.now(),
+            })
+          );
+        } catch {
+          // ignore
         }
 
         logSystemActivity(
